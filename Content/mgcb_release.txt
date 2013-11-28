@@ -1,0 +1,7 @@
+# Directories
+/outputDir:..\bin\Windows\Release\dots
+
+/rebuild
+
+# Build a texture
+/build:..\Content\Art\Blank.bmp

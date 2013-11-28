@@ -1,0 +1,10 @@
+# Directories
+/outputDir:..\bin\Windows\Debug\dots
+
+/rebuild
+
+# Build a texture
+/build:..\Content\Art\Blank.bmp
+/build:..\Content\Art\Vehicles\SampleShip.png
+/build:..\Content\Art\Backgrounds\Starfield.png
+/build:..\Content\Art\Backgrounds\Nebula.png
