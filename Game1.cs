@@ -45,6 +45,7 @@ namespace LightningBug
             startupPath = Environment.CurrentDirectory;
             slnDir = startupPath + "\\..\\..\\..";
             base.Initialize();
+            curLevel = new Level(Content);
         }
 
         /// <summary>
@@ -80,6 +81,10 @@ namespace LightningBug
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            else if (Keyboard.GetState().IsKeyDown(Keys.L) && curLevel != null)
+            {
+                ChangeLevel("test");
+            }
 
             // TODO: Add your update logic here
 
@@ -93,10 +98,15 @@ namespace LightningBug
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             spriteBatch.Begin();
-            spriteBatch.Draw(background, new Rectangle(0, 0, 800, 480), Color.White);
-            spriteBatch.Draw(ship, new Vector2(100, 100), Color.Azure);
+            // If we're in a level draw that level
+            if (curLevel != null && curLevel.IsLevelLoaded())
+            {
+                curLevel.DrawLevel(spriteBatch);
+                //spriteBatch.Draw(background, new Rectangle(0, 0, 800, 480), Color.White);
+                spriteBatch.Draw(ship, new Vector2(100, 100), Color.Azure);
+            }
+
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -106,7 +116,7 @@ namespace LightningBug
         {
             if (curLevel != null)
                 curLevel.UnloadLevel();
-            
+            curLevel.LoadLevel();            
         }
     }
 }

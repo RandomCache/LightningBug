@@ -9,28 +9,34 @@ namespace LightningBug
 {
     class BackgroundTile
     {
-        private int tileX, tileY;
+        private uint tileX, tileY; //TODO: Evaluate if these are necessary
         private Texture2D background;
-        private ContentManager contentManager;
 
         public int getTileWidth() { return (background != null) ? background.Width : -1; }
         public int getTileHeight() { return (background != null) ? background.Height : -1; }
+        public Texture2D getTexture() { return background; }
 
-        public string Init(ContentManager cm, string tileFileName)
+        public BackgroundTile(ContentManager cm, string tileFileName, uint x, uint y)
         {
-            contentManager = cm;
-
             try
             {
-                background = contentManager.Load<Texture2D>(tileFileName); // change these names to the names of your images
+                background = cm.Load<Texture2D>(tileFileName); // change these names to the names of your images
             }
             catch (Exception ex)
             {
                 //TODO log
-                return ex.Message;
+                throw ex;
             }
 
-            return null;
+            tileX = x;
+            tileY = y;
+        }
+
+        public BackgroundTile(Texture2D twoDTexture, uint x, uint y)
+        {
+            background = twoDTexture;
+            tileX = x;
+            tileY = y;
         }
     }
 }
