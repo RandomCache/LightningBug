@@ -1,0 +1,19 @@
+﻿<LightningBugLevel>
+	<BasicInfo>
+    <Name>Test1</Name>
+  </BasicInfo>
+  <Backgrounds NumLayers="2">
+    <Background>
+      <Layer>0</Layer>
+      <TexturePath>Art\\Backgrounds\\Starfield</TexturePath>
+      <NumColumns>20</NumColumns>
+      <NumRows>20</NumRows>    
+    </Background>
+     <Background>
+      <Layer>1</Layer>
+      <TexturePath>Art\\Backgrounds\\Nebula</TexturePath>
+      <NumColumns>15</NumColumns>
+      <NumRows>15</NumRows>    
+    </Background>
+  </Backgrounds>
+</LightningBugLevel>

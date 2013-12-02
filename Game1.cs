@@ -44,8 +44,8 @@ namespace LightningBug
             // TODO: Add your initialization logic here
             startupPath = Environment.CurrentDirectory;
             slnDir = startupPath + "\\..\\..\\..";
-            base.Initialize();
             curLevel = new Level(Content);
+            base.Initialize();
         }
 
         /// <summary>
@@ -61,6 +61,7 @@ namespace LightningBug
             //@TODO try catch around the loading
             background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
             ship = Content.Load<Texture2D>("Art\\SampleShip");  // if you are using your own images.
+            ChangeLevel("test");
         }
 
         /// <summary>
@@ -81,10 +82,10 @@ namespace LightningBug
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            else if (Keyboard.GetState().IsKeyDown(Keys.L) && curLevel != null)
+            /*else if (Keyboard.GetState().IsKeyDown(Keys.L) && curLevel != null)
             {
                 ChangeLevel("test");
-            }
+            }*/
 
             // TODO: Add your update logic here
 
@@ -116,7 +117,7 @@ namespace LightningBug
         {
             if (curLevel != null)
                 curLevel.UnloadLevel();
-            curLevel.LoadLevel();            
+            curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
         }
     }
 }
