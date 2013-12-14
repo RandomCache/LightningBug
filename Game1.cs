@@ -22,15 +22,20 @@ namespace LightningBug
         string startupPath, slnDir;
 
         private Texture2D background;
-        private Texture2D ship;
 
         private Level curLevel;
+        private Ship playerShip; // Move player and/or enemy ships to a controlling class?
+
+        //uint screenWidth, screenHeight;
+        Vector2 curScreenCenter;
+        Rectangle curScreen;
 
         public Game1()
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            playerShip = null;
         }
 
         /// <summary>
@@ -41,10 +46,17 @@ namespace LightningBug
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
             startupPath = Environment.CurrentDirectory;
             slnDir = startupPath + "\\..\\..\\..";
+            curScreenCenter = new Vector2();
+
             curLevel = new Level(Content);
+
+            // Get current resolution of the viewport
+            //Game.GraphicsDevice.Viewport
+            curScreen.Width = GraphicsDevice.Viewport.Width;
+            curScreen.Height = GraphicsDevice.Viewport.Height;            
+
             base.Initialize();
         }
 
@@ -60,7 +72,10 @@ namespace LightningBug
             test = "\\..\\..\\..Art\\blank.bmp";
             //@TODO try catch around the loading
             background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
-            ship = Content.Load<Texture2D>("Art\\SampleShip");  // if you are using your own images.
+            //ship = Content.Load<Texture2D>("Art\\SampleShip");  // if you are using your own images.
+
+            playerShip = new Ship();
+            playerShip.Load(Content, "Art\\SampleShip", true);
             ChangeLevel("test");
         }
 
@@ -88,7 +103,10 @@ namespace LightningBug
             }*/
 
             // TODO: Add your update logic here
-
+            if (playerShip != null)
+            {
+                playerShip.Update();
+            }
             base.Update(gameTime);
         }
 
@@ -105,7 +123,12 @@ namespace LightningBug
             {
                 curLevel.DrawLevel(spriteBatch);
                 //spriteBatch.Draw(background, new Rectangle(0, 0, 800, 480), Color.White);
-                spriteBatch.Draw(ship, new Vector2(100, 100), Color.Azure);
+                //spriteBatch.Draw(ship, new Vector2(800, 800), Color.Azure, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+            }
+
+            if (playerShip != null)
+            {
+                playerShip.Draw(spriteBatch, curScreen, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             }
 
             spriteBatch.End();
@@ -117,7 +140,18 @@ namespace LightningBug
         {
             if (curLevel != null)
                 curLevel.UnloadLevel();
-            curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
+            curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml", ref curScreenCenter);
+            // Set the current screen position
+            curScreen.X = (int)(curScreenCenter.X - (curScreen.Width / 2));
+            curScreen.Y = (int)(curScreenCenter.Y - (curScreen.Height / 2));
+            if (playerShip != null)
+            {
+                Vector2 newShipPos = curScreenCenter;
+                // Go from the center of the screen to the ship position, top left of it.
+                newShipPos.X -= playerShip.GetWidth() / 2;
+                newShipPos.Y -= playerShip.GetHeight() / 2;
+                playerShip.Reset(newShipPos);
+            }
         }
     }
 }

@@ -35,26 +35,34 @@ namespace LightningBug
 
         //LevelTile levelTiles[x][y]
         String levelName;
-        int pxWidth, pxHeight;
+        uint pxWidth, pxHeight, startScreenCenterX, startScreenCenterY;
         uint numBackgroundLayers;//, numRows, numColumns;
         bool isLevelLoaded = false;
 
         public bool IsLevelLoaded() { return isLevelLoaded; }
+
+        public uint GetLevelWidth() { return pxWidth; }
+        public uint GetLevelHeight() { return pxHeight; }
 
         public Level(ContentManager cm)
         {
             contentManager = cm;
         }
 
-        public string LoadLevel(string fileName)
+        public string LoadLevel(string fileName, ref Vector2 startingCenterScreenPos)
         {
+            isLevelLoaded = false;
             try
             {
                 XDocument xDoc = XDocument.Load(fileName);
-                XElement curElement;
+                XElement curElement, childElement;
                 curElement = xDoc.Root.Element("BasicInfo");
-                curElement = (XElement)curElement.FirstNode;
-                levelName = curElement.Value;
+                levelName = curElement.Element("Name").Value;
+                pxWidth = uint.Parse(curElement.Element("Width").Value);
+                pxHeight = uint.Parse(curElement.Element("Height").Value);
+                childElement = curElement.Element("StartingScreenPos");
+                startingCenterScreenPos.X = uint.Parse(childElement.Element("X").Value);
+                startingCenterScreenPos.Y = uint.Parse(childElement.Element("Y").Value);
 
                 curElement = xDoc.Root.Element("Backgrounds");
                 numBackgroundLayers = (uint)curElement.Attribute("NumLayers");
@@ -87,6 +95,8 @@ namespace LightningBug
                         }
                     }
                 } // if (numBackgroundLayers > 0)
+                // TODO verify starting position is in level
+                // TODO verify total level width and height are greater than our max resolution
             }
             catch (Exception ex)
             {
@@ -142,8 +152,8 @@ namespace LightningBug
                     }
                 }
             }
-            isLevelLoaded = true;
             */
+            isLevelLoaded = true;
             return null;
         }
 
@@ -156,16 +166,20 @@ namespace LightningBug
         {
             if (sb == null)
                 return "Level.DrawLevel - Error: Null SpriteBatch\n";
+            uint numColumns, numRows;
             for (int i = 0; i < numBackgroundLayers; ++i)
             {
-                /*for (uint x = 0; x < numColumns; ++x)
+                numColumns = backgroundRowTiles[i];
+                numRows = backgroundRowColumns[i];
+                // TODO only draw parts on and near screen space
+                for (uint x = 0; x < numColumns; ++x)
                 {
                     for (uint y = 0; y < numRows; ++y)
                     {
                         sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2(x * backgrounds[i][x][y].getTileWidth(),
                             y * backgrounds[i][x][y].getTileHeight()));
                     }
-                }*/
+                }
             }
             return null;
         }
