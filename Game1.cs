@@ -48,8 +48,17 @@ namespace LightningBug
         {
             startupPath = Environment.CurrentDirectory;
             slnDir = startupPath + "\\..\\..\\..";
-            curScreenCenter = new Vector2();
 
+            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferWidth = 1280;
+
+            // Move the window.  TODO center the window in the users screen
+            System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(this.Window.Handle);
+            form.Location = new System.Drawing.Point(0, 0);
+
+            graphics.ApplyChanges();
+
+            curScreenCenter = new Vector2();
             curLevel = new Level(Content);
 
             // Get current resolution of the viewport
@@ -95,19 +104,34 @@ namespace LightningBug
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            HandleInput(gameTime);
+
+            // TODO: Add your update logic here
+            if (playerShip != null)
+            {
+                playerShip.UpdatePlayersShip(ref curScreen);
+            }
+            base.Update(gameTime);
+        }
+
+        void HandleInput(GameTime gameTime)
+        {
+            // TODO make controls customizable
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             /*else if (Keyboard.GetState().IsKeyDown(Keys.L) && curLevel != null)
             {
                 ChangeLevel("test");
             }*/
-
-            // TODO: Add your update logic here
-            if (playerShip != null)
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                playerShip.Update();
+                playerShip.ChangeSpeed(gameTime.ElapsedGameTime, true);
             }
-            base.Update(gameTime);
+            else if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                playerShip.ChangeSpeed(gameTime.ElapsedGameTime, false);
+            }
+
         }
 
         /// <summary>
@@ -121,7 +145,7 @@ namespace LightningBug
             // If we're in a level draw that level
             if (curLevel != null && curLevel.IsLevelLoaded())
             {
-                curLevel.DrawLevel(spriteBatch);
+                curLevel.DrawLevel(spriteBatch, curScreen);
                 //spriteBatch.Draw(background, new Rectangle(0, 0, 800, 480), Color.White);
                 //spriteBatch.Draw(ship, new Vector2(800, 800), Color.Azure, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             }

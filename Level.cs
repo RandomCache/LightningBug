@@ -162,22 +162,33 @@ namespace LightningBug
             return null;
         }
 
-        public string DrawLevel(SpriteBatch sb)
+        public string DrawLevel(SpriteBatch sb, Rectangle curScreen)
         {
             if (sb == null)
                 return "Level.DrawLevel - Error: Null SpriteBatch\n";
             uint numColumns, numRows;
+            int curTileWidth = 0, curTileHeight = 0;
             for (int i = 0; i < numBackgroundLayers; ++i)
             {
                 numColumns = backgroundRowTiles[i];
                 numRows = backgroundRowColumns[i];
-                // TODO only draw parts on and near screen space
+                if(numColumns > 0 && numRows > 0)
+                {
+                    curTileWidth = backgrounds[i][0][0].getTileWidth();
+                    curTileHeight = backgrounds[i][0][0].getTileHeight();
+                }
+                // TODO don't run through the tiles not near the screen
                 for (uint x = 0; x < numColumns; ++x)
                 {
                     for (uint y = 0; y < numRows; ++y)
                     {
-                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2(x * backgrounds[i][x][y].getTileWidth(),
-                            y * backgrounds[i][x][y].getTileHeight()));
+                        //Is this tile in the screen?
+                        if (((x * (curTileWidth + 1)) < curScreen.X || (x * curTileWidth) > curScreen.X + curScreen.Width) &&
+                            ((y * (curTileHeight + 1)) < curScreen.Y || (y * curTileHeight) > curScreen.Y + curScreen.Height))
+                            continue;
+                        //Translate the tiles world coordinates to scren coordinates
+                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2(x * curTileWidth,
+                            y * curTileHeight));
                     }
                 }
             }
