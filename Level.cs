@@ -26,7 +26,7 @@ Objects*[]
 
 namespace LightningBug
 {
-    class Level
+    public class Level
     {
         private ContentManager contentManager;
         BackgroundTile[][][] backgrounds; //[num of layers][num of tiles in a row][num of tiles in a column]
@@ -162,7 +162,8 @@ namespace LightningBug
             return null;
         }
 
-        public string DrawLevel(SpriteBatch sb, Rectangle curScreen)
+        //public string DrawLevel(SpriteBatch sb, Rectangle curScreen)
+        public string DrawLevel(SpriteBatch sb, Vector2 curScreenPos, Vector2 curScreenDimensions)
         {
             if (sb == null)
                 return "Level.DrawLevel - Error: Null SpriteBatch\n";
@@ -183,12 +184,25 @@ namespace LightningBug
                     for (uint y = 0; y < numRows; ++y)
                     {
                         //Is this tile in the screen?
-                        if (((x * (curTileWidth + 1)) < curScreen.X || (x * curTileWidth) > curScreen.X + curScreen.Width) &&
-                            ((y * (curTileHeight + 1)) < curScreen.Y || (y * curTileHeight) > curScreen.Y + curScreen.Height))
+                        /* Temp commented out changing curScreen rect to vectors
+                        if ((((x + 1) * curTileWidth) < curScreen.X || (x * curTileWidth) > curScreen.X + curScreen.Width) &&
+                            (((y + 1) * curTileHeight) < curScreen.Y || (y * curTileHeight) > curScreen.Y + curScreen.Height))
                             continue;
+                        */
+
+                        if ((((x + 1) * curTileWidth) < curScreenPos.X || (x * curTileWidth) > curScreenPos.X + curScreenDimensions.X) &&
+                            (((y + 1) * curTileHeight) < curScreenPos.Y || (y * curTileHeight) > curScreenPos.Y + curScreenDimensions.Y))
+                            continue;
+
                         //Translate the tiles world coordinates to scren coordinates
-                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2(x * curTileWidth,
-                            y * curTileHeight));
+                        // World = (x * curTileWidth, y * curTileHeight)
+                        // Screen = curscreen - world
+                        /* Temp commented out changing curScreen rect to vectors
+                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2((x * curTileWidth) - curScreen.X,
+                            (y * curTileHeight) - curScreen.Y));
+                        */
+                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2((x * curTileWidth) - curScreenPos.X,
+                            (y * curTileHeight) - curScreenPos.Y));
                     }
                 }
             }

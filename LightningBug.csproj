@@ -36,8 +36,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BackgroundTile.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="Collision.cs" />
+    <Compile Include="Logging.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Level.cs" />
+    <Compile Include="Math.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ship.cs" />
