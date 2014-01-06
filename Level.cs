@@ -108,51 +108,6 @@ namespace LightningBug
 
 
             bool readResult = false;
-            /*
-            XmlReaderSettings settings = new XmlReaderSettings();
-            using (XmlReader reader = XmlReader.Create(fileName, settings))
-            {
-                while(reader.Read() == true)
-                {
-                    switch(reader.Name)
-                    {
-                        case "LightningBugLevel":
-                            break;
-                        case "BasicInfo":
-                            if(reader.Read())//<Name>
-                            {
-                                levelName = reader.Value;
-                            }
-                            break;
-                    }
-                }
-            }
-            */
-            /*
-            isLevelLoaded = false;
-            //TEMP TEST CODE
-            numBackgroundLayers = 1;
-            //uint numRows, numColumns;
-            numRows = numColumns = 20;
-            Texture2D tempStarfield = contentManager.Load<Texture2D>("Art\\Backgrounds\\Starfield");
-            backgrounds = new BackgroundTile[numBackgroundLayers][][];
-            //END TEMP TEST CODE
-            //Load the level info from a file
-            for (int i = 0; i < numBackgroundLayers; ++i)
-            {
-                backgrounds[i] = new BackgroundTile[numColumns][];
-                //TODO variable to tell if the tiles for this layer all have the same image
-                //Initialize the tiles for this layer
-                for (uint x = 0; x < numColumns; ++x)
-                {
-                    backgrounds[i][x] = new BackgroundTile[numRows];
-                    for (uint y = 0; y < numRows; ++y)
-                    {
-                        backgrounds[i][x][y] = new BackgroundTile(tempStarfield, x, y);
-                    }
-                }
-            }
-            */
             isLevelLoaded = true;
             return null;
         }
@@ -162,7 +117,6 @@ namespace LightningBug
             return null;
         }
 
-        //public string DrawLevel(SpriteBatch sb, Rectangle curScreen)
         public string DrawLevel(SpriteBatch sb, Vector2 curScreenPos, Vector2 curScreenDimensions)
         {
             if (sb == null)
@@ -184,12 +138,6 @@ namespace LightningBug
                     for (uint y = 0; y < numRows; ++y)
                     {
                         //Is this tile in the screen?
-                        /* Temp commented out changing curScreen rect to vectors
-                        if ((((x + 1) * curTileWidth) < curScreen.X || (x * curTileWidth) > curScreen.X + curScreen.Width) &&
-                            (((y + 1) * curTileHeight) < curScreen.Y || (y * curTileHeight) > curScreen.Y + curScreen.Height))
-                            continue;
-                        */
-
                         if ((((x + 1) * curTileWidth) < curScreenPos.X || (x * curTileWidth) > curScreenPos.X + curScreenDimensions.X) &&
                             (((y + 1) * curTileHeight) < curScreenPos.Y || (y * curTileHeight) > curScreenPos.Y + curScreenDimensions.Y))
                             continue;
@@ -197,10 +145,6 @@ namespace LightningBug
                         //Translate the tiles world coordinates to scren coordinates
                         // World = (x * curTileWidth, y * curTileHeight)
                         // Screen = curscreen - world
-                        /* Temp commented out changing curScreen rect to vectors
-                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2((x * curTileWidth) - curScreen.X,
-                            (y * curTileHeight) - curScreen.Y));
-                        */
                         sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2((x * curTileWidth) - curScreenPos.X,
                             (y * curTileHeight) - curScreenPos.Y));
                     }

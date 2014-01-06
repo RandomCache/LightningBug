@@ -24,7 +24,6 @@ namespace LightningBug
         // TODO: Move graphics to it's own class.  duh
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        //Collision collision;
         string startupPath, slnDir;
 
         private Texture2D background;
@@ -32,9 +31,7 @@ namespace LightningBug
         private Level curLevel;
         private Ship playerShip; // Move player and/or enemy ships to a controlling class?
 
-        //uint screenWidth, screenHeight;
         Vector2 curScreenCenter;
-        //Rectangle curScreen;
         Vector2 curScreenPos, curScreenDimensions;
 
 #region properties
@@ -73,9 +70,7 @@ namespace LightningBug
             curScreenCenter = new Vector2();
             curLevel = new Level(Content);
 
-            // Get current resolution of the viewport
-            //curScreen.Width = GraphicsDevice.Viewport.Width;
-            //curScreen.Height = GraphicsDevice.Viewport.Height;            
+            // Get current resolution of the viewport         
             curScreenDimensions.X = GraphicsDevice.Viewport.Width;
             curScreenDimensions.Y = GraphicsDevice.Viewport.Height;
 
@@ -167,14 +162,10 @@ namespace LightningBug
             if (curLevel != null && curLevel.IsLevelLoaded())
             {
                 curLevel.DrawLevel(spriteBatch, curScreenPos, curScreenDimensions);
-                //spriteBatch.Draw(background, new Rectangle(0, 0, 800, 480), Color.White);
-                //spriteBatch.Draw(ship, new Vector2(800, 800), Color.Azure, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             }
 
             if (playerShip != null)
-            {
                 playerShip.Draw(spriteBatch, curScreenPos, curScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
-            }
 
             spriteBatch.End();
 
@@ -187,10 +178,6 @@ namespace LightningBug
                 curLevel.UnloadLevel();
             curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml", ref curScreenCenter);
             // Set the current screen position
-            /* Temp commented out changing curScreen rect to vectors
-            curScreen.X = (int)(curScreenCenter.X - (curScreen.Width / 2));
-            curScreen.Y = (int)(curScreenCenter.Y - (curScreen.Height / 2));
-            */
             curScreenPos.X = (int)(curScreenCenter.X - (curScreenDimensions.X / 2));
             curScreenPos.Y = (int)(curScreenCenter.Y - (curScreenDimensions.Y / 2));
             if (playerShip != null)
