@@ -35,7 +35,7 @@ namespace LightningBug
 
         //LevelTile levelTiles[x][y]
         String levelName;
-        uint pxWidth, pxHeight, startScreenCenterX, startScreenCenterY;
+        uint pxWidth, pxHeight;
         uint numBackgroundLayers;//, numRows, numColumns;
         bool isLevelLoaded = false;
 
@@ -44,13 +44,17 @@ namespace LightningBug
         public uint GetLevelWidth() { return pxWidth; }
         public uint GetLevelHeight() { return pxHeight; }
 
+        //Ship testObj;
+
         public Level(ContentManager cm)
         {
             contentManager = cm;
+            //testObj = new Ship();
         }
 
         public string LoadLevel(string fileName, ref Vector2 startingCenterScreenPos)
         {
+            //testObj.Load(contentManager, "Art\\Vehicles\\2dAlienUfo", false);
             isLevelLoaded = false;
             try
             {
@@ -105,9 +109,6 @@ namespace LightningBug
                 //TODO show messagebox
                 Environment.Exit(0);
             }
-
-
-            bool readResult = false;
             isLevelLoaded = true;
             return null;
         }
@@ -117,10 +118,14 @@ namespace LightningBug
             return null;
         }
 
-        public string DrawLevel(SpriteBatch sb, Vector2 curScreenPos, Vector2 curScreenDimensions)
+        public string DrawLevel(SpriteBatch sb, Camera2D camera, Vector2 curScreenPos, Vector2 curScreenDimensions)
         {
             if (sb == null)
                 return "Level.DrawLevel - Error: Null SpriteBatch\n";
+
+            Vector2 topLeft = camera.ToVirtual(Vector2.Zero, false);
+            Vector2 bottomRight = camera.ToVirtual(curScreenDimensions, false);
+
             uint numColumns, numRows;
             int curTileWidth = 0, curTileHeight = 0;
             for (int i = 0; i < numBackgroundLayers; ++i)
@@ -137,19 +142,19 @@ namespace LightningBug
                 {
                     for (uint y = 0; y < numRows; ++y)
                     {
-                        //Is this tile in the screen?
-                        if ((((x + 1) * curTileWidth) < curScreenPos.X || (x * curTileWidth) > curScreenPos.X + curScreenDimensions.X) &&
-                            (((y + 1) * curTileHeight) < curScreenPos.Y || (y * curTileHeight) > curScreenPos.Y + curScreenDimensions.Y))
+                        if ((((x + 1) * curTileWidth) < topLeft.X || (x * curTileWidth) > bottomRight.X) &&
+                            (((y + 1) * curTileHeight) < topLeft.Y || (y * curTileHeight) > bottomRight.Y))
                             continue;
 
-                        //Translate the tiles world coordinates to scren coordinates
-                        // World = (x * curTileWidth, y * curTileHeight)
-                        // Screen = curscreen - world
-                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2((x * curTileWidth) - curScreenPos.X,
-                            (y * curTileHeight) - curScreenPos.Y));
+                        sb.Draw(backgrounds[i][x][y].getTexture(), new Vector2(x * curTileWidth, y * curTileHeight));
                     }
                 }
             }
+
+
+            //testObj.SetPosition(new Vector2(bottomRight.X - 100, bottomRight.Y - 100));
+            //testObj.SetPosition(new Vector2(topLeft.X, topLeft.Y));
+            //testObj.Draw(sb, camera, curScreenPos, curScreenDimensions, pxWidth, pxHeight);
             return null;
         }
     }

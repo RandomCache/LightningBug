@@ -24,6 +24,9 @@ namespace LightningBug
         // TODO: Move graphics to it's own class.  duh
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        private ResolutionRenderer irr;
+        private Camera2D camera;
+
         string startupPath, slnDir;
 
         private Texture2D background;
@@ -31,8 +34,7 @@ namespace LightningBug
         private Level curLevel;
         private Ship playerShip; // Move player and/or enemy ships to a controlling class?
 
-        Vector2 curScreenCenter;
-        Vector2 curScreenPos, curScreenDimensions;
+        Vector2 curScreenCenter, curScreenPos, screenDimensions, virtualScreenDimensions;
 
 #region properties
         public Level GetCurLevel()  { return curLevel; }
@@ -58,9 +60,17 @@ namespace LightningBug
             startupPath = Environment.CurrentDirectory;
             slnDir = startupPath + "\\..\\..\\..";
 
-            graphics.PreferredBackBufferHeight = 720;
             graphics.PreferredBackBufferWidth = 1280;
+            graphics.PreferredBackBufferHeight = 720;
 
+            virtualScreenDimensions.X = 1920;
+            virtualScreenDimensions.Y = 1080;
+
+            // Camera and Independent Resolution Renderer Setup
+            irr = new ResolutionRenderer(this, (int)virtualScreenDimensions.X, (int)virtualScreenDimensions.Y, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            camera = new Camera2D(irr) { MaxZoom = 2f, MinZoom = 1f, Zoom = 1f };
+            camera.SetPosition(Vector2.Zero);
+            camera.RecalculateTransformationMatrices();
             // Move the window.  TODO center the window in the users screen
             System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(this.Window.Handle);
             form.Location = new System.Drawing.Point(0, 0);
@@ -71,8 +81,8 @@ namespace LightningBug
             curLevel = new Level(Content);
 
             // Get current resolution of the viewport         
-            curScreenDimensions.X = GraphicsDevice.Viewport.Width;
-            curScreenDimensions.Y = GraphicsDevice.Viewport.Height;
+            screenDimensions.X = GraphicsDevice.Viewport.Width;
+            screenDimensions.Y = GraphicsDevice.Viewport.Height;
 
             base.Initialize();
         }
@@ -92,7 +102,7 @@ namespace LightningBug
             //ship = Content.Load<Texture2D>("Art\\SampleShip");  // if you are using your own images.
 
             playerShip = new Ship();
-            playerShip.Load(Content, "Art\\SampleShip", true);
+            playerShip.Load(Content, "Art\\Vehicles\\SampleShip", true);
             ChangeLevel("test");
         }
 
@@ -114,11 +124,14 @@ namespace LightningBug
         {
             HandleInput(gameTime);
 
-            // TODO: Add your update logic here
             if (playerShip != null)
             {
-                playerShip.UpdatePlayersShip(ref curScreenPos, ref curScreenDimensions);
+                //playerShip.UpdatePlayersShip(ref curScreenPos);
+                playerShip.UpdatePlayersShip();
+                
             }
+
+            camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             base.Update(gameTime);
         }
 
@@ -156,18 +169,33 @@ namespace LightningBug
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            //Prepare IRR call
+            irr.Draw();
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, camera.GetViewTransformationMatrix());
+            //IRR only - mBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, renderer.GetTransformationMatrix());
+            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, irr.GetTransformationMatrix());
             // If we're in a level draw that level
             if (curLevel != null && curLevel.IsLevelLoaded())
             {
-                curLevel.DrawLevel(spriteBatch, curScreenPos, curScreenDimensions);
+                //curLevel.DrawLevel(spriteBatch, camera, curScreenPos, virtualScreenDimensions);
+                curLevel.DrawLevel(spriteBatch, camera, curScreenPos, screenDimensions);
             }
 
             if (playerShip != null)
-                playerShip.Draw(spriteBatch, curScreenPos, curScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+                playerShip.Draw(spriteBatch, camera, curScreenPos, virtualScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
 
             spriteBatch.End();
+
+            /* Left in for UI work later
+            //reset screen viewport back to full size
+            //so we can draw text from the TopLeft corner of the real screen
+            _irr.SetupFullViewport();
+            _mBatch.Begin();
+            _mBatch.DrawString(_font, "Resolution independent renderer", Vector2.Zero, Color.White, 0f, Vector2.Zero, .7f, SpriteEffects.None, 0f);
+            _mBatch.End();
+            */
 
             base.Draw(gameTime);
         }
@@ -178,8 +206,8 @@ namespace LightningBug
                 curLevel.UnloadLevel();
             curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml", ref curScreenCenter);
             // Set the current screen position
-            curScreenPos.X = (int)(curScreenCenter.X - (curScreenDimensions.X / 2));
-            curScreenPos.Y = (int)(curScreenCenter.Y - (curScreenDimensions.Y / 2));
+            curScreenPos.X = (int)(curScreenCenter.X - (virtualScreenDimensions.X / 2));
+            curScreenPos.Y = (int)(curScreenCenter.Y - (virtualScreenDimensions.Y / 2));
             if (playerShip != null)
             {
                 Vector2 newShipPos = curScreenCenter;
@@ -188,6 +216,7 @@ namespace LightningBug
                 newShipPos.Y -= playerShip.GetHeight() / 2;
                 playerShip.Reset(newShipPos);
             }
+            camera.StartFollow(playerShip);
         }
     }
 }

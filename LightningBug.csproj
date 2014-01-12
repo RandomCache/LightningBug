@@ -36,13 +36,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BackgroundTile.cs" />
+    <Compile Include="Camera2D.cs" />
     <Compile Include="Collision.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Level.cs" />
     <Compile Include="Math.cs" />
+    <Compile Include="Object.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResolutionRenderer.cs" />
     <Compile Include="Ship.cs" />
   </ItemGroup>
   <ItemGroup>
