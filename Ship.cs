@@ -14,7 +14,7 @@ namespace LightningBug
     public class Ship : Object // TODO Componentize
     {
         private bool mainPlayerShip;
-
+        public Color testColor = Color.White;
         public string Load(ContentManager content, string texturePath, bool isMainPlayer)
         {
             texture = content.Load<Texture2D>(texturePath);
@@ -33,6 +33,17 @@ namespace LightningBug
             rotationRate = 0.002f; // Degrees per second
             
             rotationAngleRads = 0;
+
+            //TEST - Later these will be data driven
+            Vector2[] offsets = new Vector2[4];
+            offsets[0] = new Vector2(0, 0);
+            offsets[1] = new Vector2(0, size.Y);
+            offsets[2] = new Vector2(size.X, size.Y);
+            offsets[3] = new Vector2(size.X, 0);
+            Physics.Polygon tempPoly = new Physics.Polygon(pos, offsets, 4);
+            collisionPolygons.Add(tempPoly);
+            //ENDTEST
+            SetPosition(pos);
             return null;
         }
 
@@ -85,8 +96,9 @@ namespace LightningBug
             deltaX = direction.X * speed;
             deltaY = direction.Y * speed;
             //Logging.Instance(Logging.DEFAULTLOG).Log("UpdatePlayersShip: direction: " + direction.X + ", " + direction.Y + " speed: " + speed + "\n");
-            pos.X += deltaX;
-            pos.Y += deltaY;
+            //pos.X += deltaX;
+            //pos.Y += deltaY;
+            SetPosition(new Vector2(pos.X + deltaX, pos.Y + deltaY));
             //Logging.Instance(Logging.DEFAULTLOG).Log("UpdatePlayersShip: position: " + xPos + ", " + yPos + "\n");
 
             // Check collision
@@ -101,15 +113,15 @@ namespace LightningBug
 
             // Translate world coordinates to screen coordinates
             if (mainPlayerShip) // If this is the players ship we want it at the center of the screen
-                spriteBatch.Draw(texture, pos, null, Color.White, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
             else
-                spriteBatch.Draw(texture, pos);
+                spriteBatch.Draw(texture, pos, testColor);
             return null;
         }
 
         public void Reset(Vector2 newPos)
         {
-            pos = newPos;
+            SetPosition(newPos);
         }
     }
 }

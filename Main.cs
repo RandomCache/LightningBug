@@ -13,7 +13,8 @@ namespace LightningBug
 {
     public class Globals 
     { 
-        public static Collision gCollision; 
+        public static Collision gCollision;
+        public static Dictionary<string, SpriteFont> gFonts;
     }
     
     /// <summary>
@@ -24,6 +25,7 @@ namespace LightningBug
         // TODO: Move graphics to it's own class.  duh
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        UI.UIManager uiManager;
         private ResolutionRenderer irr;
         private Camera2D camera;
 
@@ -33,20 +35,27 @@ namespace LightningBug
 
         private Level curLevel;
         private Ship playerShip; // Move player and/or enemy ships to a controlling class?
+        public List<Ship> enemyShips;
 
         Vector2 curScreenCenter, curScreenPos, screenDimensions, virtualScreenDimensions;
 
 #region properties
         public Level GetCurLevel()  { return curLevel; }
+        public Ship GetPlayersShip() { return playerShip; }
 #endregion
 
         public LightningBug()
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
-            Globals.gCollision = Collision.Instance(this);
             Content.RootDirectory = "Content";
-            playerShip = null;
+            //Globals
+            Globals.gCollision = Collision.Instance(this);
+            Globals.gFonts = new Dictionary<string, SpriteFont>();
+
+            uiManager = new UI.UIManager();
+            playerShip = new Ship();
+            enemyShips = new List<Ship>();
         }
 
         /// <summary>
@@ -99,10 +108,9 @@ namespace LightningBug
             test = "\\..\\..\\..Art\\blank.bmp";
             //@TODO try catch around the loading
             background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
-            //ship = Content.Load<Texture2D>("Art\\SampleShip");  // if you are using your own images.
-
-            playerShip = new Ship();
             playerShip.Load(Content, "Art\\Vehicles\\SampleShip", true);
+            Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
+            uiManager.Load(Content, "test");
             ChangeLevel("test");
         }
 
@@ -132,6 +140,7 @@ namespace LightningBug
             }
 
             camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+            uiManager.UpdateAll(irr);
             base.Update(gameTime);
         }
 
@@ -188,14 +197,16 @@ namespace LightningBug
 
             spriteBatch.End();
 
-            /* Left in for UI work later
+            //Left in for UI work later
             //reset screen viewport back to full size
             //so we can draw text from the TopLeft corner of the real screen
-            _irr.SetupFullViewport();
-            _mBatch.Begin();
-            _mBatch.DrawString(_font, "Resolution independent renderer", Vector2.Zero, Color.White, 0f, Vector2.Zero, .7f, SpriteEffects.None, 0f);
-            _mBatch.End();
-            */
+            irr.SetupFullViewport();
+            spriteBatch.Begin();
+            uiManager.Draw(spriteBatch);
+            //_mBatch.DrawString(_font, "Resolution independent renderer", Vector2.Zero, Color.White, 0f, Vector2.Zero, .7f, SpriteEffects.None, 0f);
+            spriteBatch.End();
+            
+
 
             base.Draw(gameTime);
         }
@@ -212,8 +223,8 @@ namespace LightningBug
             {
                 Vector2 newShipPos = curScreenCenter;
                 // Go from the center of the screen to the ship position, top left of it.
-                newShipPos.X -= playerShip.GetWidth() / 2;
-                newShipPos.Y -= playerShip.GetHeight() / 2;
+                newShipPos.X -= playerShip.GetSize().X / 2;
+                newShipPos.Y -= playerShip.GetSize().Y / 2;
                 playerShip.Reset(newShipPos);
             }
             camera.StartFollow(playerShip);
