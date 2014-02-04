@@ -24,6 +24,7 @@ namespace LightningBug
             
             scale = new Vector2(100f/texture.Width, 100f/texture.Height);
             rotationOrigin = new Vector2(texture.Width / 2, texture.Width / 2); // Spritebatch.draw uses the texture size when given a rotation origin, not the destination rect size
+            scaledOrigin = new Vector2(rotationOrigin.X * scale.X, rotationOrigin.Y * scale.Y);
             mainPlayerShip = isMainPlayer;
             direction = new Vector2(0, -1);
             speed = 0;
@@ -40,7 +41,7 @@ namespace LightningBug
             offsets[1] = new Vector2(0, size.Y);
             offsets[2] = new Vector2(size.X, size.Y);
             offsets[3] = new Vector2(size.X, 0);
-            Physics.Polygon tempPoly = new Physics.Polygon(pos, offsets, 4);
+            Physics.Polygon tempPoly = new Physics.Polygon(pos, offsets, scaledOrigin, 4);
             collisionPolygons.Add(tempPoly);
             //ENDTEST
             SetPosition(pos);
@@ -103,6 +104,27 @@ namespace LightningBug
 
             // Check collision
             Globals.gCollision.CheckShip(this);
+            Update();
+        }
+
+        public void Update()
+        {
+            // Add the lines of collision polygons for later drawing
+            foreach (Physics.Polygon poly in collisionPolygons)
+            {
+                for (int i = 0; i < poly.vertices.Length; ++i)
+                {
+                    //TODO change nonRotatedVertices to vertices when rotation is working
+                    if (i == 0)
+                        Globals.gPrimitives.AddLine(poly.vertices[poly.vertexOffests.Length - 1], poly.vertices[i]);
+                    else
+                        Globals.gPrimitives.AddLine(poly.vertices[i - 1], poly.vertices[i]);
+/*if (i == 0)
+    Globals.gPrimitives.AddLine(poly.vertices[poly.vertexOffests.Length - 1], poly.vertexOffests[i]);
+else
+    Globals.gPrimitives.AddLine(poly.vertexOffests[i - 1], poly.vertexOffests[i]);                    */
+                }
+            }
         }
 
         public string Draw(SpriteBatch spriteBatch, Camera2D camera, Vector2 curScreenPos, Vector2 curScreenDimensions, uint levelWidth, uint levelHeight)
@@ -112,10 +134,11 @@ namespace LightningBug
             // TODO Check if the ship is visible
 
             // Translate world coordinates to screen coordinates
-            if (mainPlayerShip) // If this is the players ship we want it at the center of the screen
+            /*if (mainPlayerShip) // If this is the players ship we want it at the center of the screen
                 spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
             else
-                spriteBatch.Draw(texture, pos, testColor);
+                spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);*/
+            spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
             return null;
         }
 

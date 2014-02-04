@@ -27,17 +27,25 @@ namespace LightningBug
         // Checks the given ship against the edges of the level and all colliding objects
         public void CheckShip(Ship toCheck)
         {
+            // First check this ship against the players ship
             Ship playerShip = homeClass.GetPlayersShip();
-            if (playerShip.GetId() != playerShip.GetId())
+            if (playerShip.GetId() != toCheck.GetId())
             {
                 //RectRect(toCheck.GetPosition(), toCheck.GetSize(), playerShip.GetPosition(), playerShip.GetSize());
-                CheckIntersection(toCheck.collisionPolygons, playerShip.collisionPolygons);
+                if (CheckIntersection(toCheck.collisionPolygons, playerShip.collisionPolygons))
+                    toCheck.testColor = Color.Green;
             }
             //enemyShips
+            foreach(Ship enemy in homeClass.enemyShips)
+            {
+                if (enemy.GetId() == toCheck.GetId())
+                    continue;
+                if (CheckIntersection(toCheck.collisionPolygons, enemy.collisionPolygons))
+                    toCheck.testColor = Color.Green;
+            }
 
             // Lastly check against the level
             Level curLevel = homeClass.GetCurLevel();
-
         }
 
         private bool CheckIntersection(List<Physics.Polygon> objectPolys1, List<Physics.Polygon> objectPolys2)

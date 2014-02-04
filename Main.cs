@@ -15,6 +15,7 @@ namespace LightningBug
     { 
         public static Collision gCollision;
         public static Dictionary<string, SpriteFont> gFonts;
+        public static Graphics.Primitives gPrimitives;
     }
     
     /// <summary>
@@ -52,6 +53,7 @@ namespace LightningBug
             //Globals
             Globals.gCollision = Collision.Instance(this);
             Globals.gFonts = new Dictionary<string, SpriteFont>();
+            Globals.gPrimitives = new Graphics.Primitives();
 
             uiManager = new UI.UIManager();
             playerShip = new Ship();
@@ -93,6 +95,8 @@ namespace LightningBug
             screenDimensions.X = GraphicsDevice.Viewport.Width;
             screenDimensions.Y = GraphicsDevice.Viewport.Height;
 
+            Globals.gPrimitives.Init(graphics.GraphicsDevice);
+
             base.Initialize();
         }
 
@@ -107,8 +111,6 @@ namespace LightningBug
             string test = slnDir + "\\Art\\blank.bmp";
             test = "\\..\\..\\..Art\\blank.bmp";
             //@TODO try catch around the loading
-            background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
-            playerShip.Load(Content, "Art\\Vehicles\\SampleShip", true);
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
             uiManager.Load(Content, "test");
             ChangeLevel("test");
@@ -130,13 +132,18 @@ namespace LightningBug
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            // Clear previous frame data
+            Globals.gPrimitives.ClearAll();
+
             HandleInput(gameTime);
 
             if (playerShip != null)
             {
-                //playerShip.UpdatePlayersShip(ref curScreenPos);
                 playerShip.UpdatePlayersShip();
-                
+            }
+            foreach (Ship enemy in enemyShips)
+            {
+                enemy.Update();
             }
 
             camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
@@ -169,7 +176,6 @@ namespace LightningBug
             {
                 playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, true);
             }
-
         }
 
         /// <summary>
@@ -184,29 +190,29 @@ namespace LightningBug
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, camera.GetViewTransformationMatrix());
             //IRR only - mBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, renderer.GetTransformationMatrix());
-            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, irr.GetTransformationMatrix());
             // If we're in a level draw that level
             if (curLevel != null && curLevel.IsLevelLoaded())
             {
-                //curLevel.DrawLevel(spriteBatch, camera, curScreenPos, virtualScreenDimensions);
                 curLevel.DrawLevel(spriteBatch, camera, curScreenPos, screenDimensions);
             }
 
             if (playerShip != null)
                 playerShip.Draw(spriteBatch, camera, curScreenPos, virtualScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
 
+            foreach (Ship enemy in enemyShips)
+            {
+                enemy.Draw(spriteBatch, camera, curScreenPos, virtualScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+            }
+
+            Globals.gPrimitives.DrawAllPrimitives(spriteBatch);
             spriteBatch.End();
 
-            //Left in for UI work later
-            //reset screen viewport back to full size
+            //For Drawing UI: Reset screen viewport back to full size
             //so we can draw text from the TopLeft corner of the real screen
             irr.SetupFullViewport();
             spriteBatch.Begin();
             uiManager.Draw(spriteBatch);
-            //_mBatch.DrawString(_font, "Resolution independent renderer", Vector2.Zero, Color.White, 0f, Vector2.Zero, .7f, SpriteEffects.None, 0f);
             spriteBatch.End();
-            
-
 
             base.Draw(gameTime);
         }
@@ -219,15 +225,29 @@ namespace LightningBug
             // Set the current screen position
             curScreenPos.X = (int)(curScreenCenter.X - (virtualScreenDimensions.X / 2));
             curScreenPos.Y = (int)(curScreenCenter.Y - (virtualScreenDimensions.Y / 2));
-            if (playerShip != null)
-            {
-                Vector2 newShipPos = curScreenCenter;
-                // Go from the center of the screen to the ship position, top left of it.
-                newShipPos.X -= playerShip.GetSize().X / 2;
-                newShipPos.Y -= playerShip.GetSize().Y / 2;
-                playerShip.Reset(newShipPos);
-            }
+            background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
+
+            if (playerShip == null)
+            playerShip = new Ship();
+            playerShip.Load(Content, "Art\\Vehicles\\SampleShip", true);
+
+            Vector2 newShipPos = curScreenCenter;
+            // Go from the center of the screen to the ship position, top left of it.
+            newShipPos.X -= playerShip.GetSize().X / 2;
+            newShipPos.Y -= playerShip.GetSize().Y / 2;
+            playerShip.Reset(newShipPos);
             camera.StartFollow(playerShip);
+
+            // Load enemies
+            Ship tempShip = new Ship();
+            tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
+            tempShip.SetPosition(new Vector2(3000, 2500));
+            enemyShips.Add(tempShip);
+
+            tempShip = new Ship();
+            tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
+            tempShip.SetPosition(new Vector2(3050, 2200));
+            enemyShips.Add(tempShip);
         }
     }
 }

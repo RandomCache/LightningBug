@@ -13,7 +13,8 @@ namespace LightningBug
         private static long newObjectId = long.MinValue;
         protected long id;
         protected Texture2D texture;
-        protected Vector2 pos, size, rotationOrigin, scale, direction;
+        // scaledOrigin exists because of the shifting spriteBatch.Draw does to the position the sprite is displayed
+        protected Vector2 pos, size, rotationOrigin, scale, direction, scaledOrigin;
         //protected Vector2 oldPos; // Position of the object from before it was last changed
         protected float speed, maxSpeed, accelerationRate, rotationSpeed, maxRotationSpeed, rotationRate, rotationAngleRads;
         
@@ -47,7 +48,9 @@ namespace LightningBug
         {
             pos = newPos;
             vertices[0] = pos;
-            
+
+            foreach (Physics.Polygon poly in collisionPolygons)
+                poly.SetPosition(pos, scaledOrigin, rotationAngleRads);
         }
 
         public void Rotate()

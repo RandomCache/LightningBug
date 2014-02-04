@@ -172,6 +172,40 @@ namespace LightningBug
             return _transform;
         }
 
+        public Matrix GetViewTransformationMatrix2()
+        {
+            Matrix ret;
+            //if (_isViewTransformationDirty)
+            {
+                _camTranslationVector.X = -_position.X;
+                _camTranslationVector.Y = -_position.Y;
+
+                Matrix.CreateTranslation(ref _camTranslationVector, out _camTranslationMatrix);
+                Matrix.CreateRotationZ(_rotation, out _camRotationMatrix);
+
+                _camScaleVector.X = _zoom;
+                _camScaleVector.Y = _zoom;
+                _camScaleVector.Z = 1;
+
+                Matrix.CreateScale(ref _camScaleVector, out _camScaleMatrix);
+
+                _resTranslationVector.X = IRR.VirtualWidth * 0.5f;
+                _resTranslationVector.Y = IRR.VirtualHeight * 0.5f;
+                _resTranslationVector.Z = 0;
+
+                Matrix.CreateTranslation(ref _resTranslationVector, out _resTranslationMatrix);
+
+                ret = _camTranslationMatrix *
+                             _camRotationMatrix *
+                             _camScaleMatrix *
+                             _resTranslationMatrix;
+
+                _isViewTransformationDirty = false;
+            }
+
+            return ret;
+        }
+
         public void RecalculateTransformationMatrices()
         {
             _isViewTransformationDirty = true;

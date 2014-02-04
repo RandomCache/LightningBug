@@ -43,11 +43,16 @@ namespace LightningBug.UI
                             Vector2 mytempstrsize = spriteFont.MeasureString(tempStr);
                             if (mytempstrsize.X >= maxLineWidth)
                             {
-                                newSentence.AppendLine(tempStr);
-                                // Line will be the beginning of the next line
-                                if (i + 1 < word.Length)
+                                if(i > 1)
                                 {
-                                    line = word.Substring(i + 1) + " ";
+                                    tempStr = tempStr.Substring(0, tempStr.Length - 1);
+                                }
+
+                                newSentence.AppendLine(tempStr);
+                                // line will be the beginning of the next line
+                                if (i < word.Length)
+                                {
+                                    line = word.Substring(i) + " ";
                                     totalLineSize = spriteFont.MeasureString(line);
                                 }
                                 else
