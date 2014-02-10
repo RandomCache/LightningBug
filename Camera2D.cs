@@ -314,7 +314,7 @@ namespace LightningBug
                 Vector2 screenBottomRight = ToVirtual(new Vector2(IRR.ScreenWidth, IRR.ScreenHeight), false);
                 float halfWidth = (screenBottomRight.X - screenTopLeft.X) / 2;
                 float halfHeight = (screenBottomRight.Y - screenTopLeft.Y) / 2;
-
+                
                 if (_position.X - halfWidth < 0)
                 {
                     finalPosition.X -= _position.X - halfWidth; 

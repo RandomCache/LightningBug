@@ -11,7 +11,6 @@ namespace LightningBug.Graphics
     {
         private VertexPositionColor[] lineVertices;
         private int lineVertsCount;
-        private BasicEffect _basicEffect;
         private GraphicsDevice graphicsDevice;
         private Texture2D blank;
 
@@ -23,8 +22,6 @@ namespace LightningBug.Graphics
         public void Init(GraphicsDevice device)
         {
             graphicsDevice = device;
-            _basicEffect = new BasicEffect(graphicsDevice);
-            _basicEffect.VertexColorEnabled = true;
             blank = new Texture2D(graphicsDevice, 1, 1, false, SurfaceFormat.Color);
             blank.SetData(new[] { Color.White });
         }

@@ -60,6 +60,11 @@ namespace LightningBug
                 speed = -maxSpeed;
         }
 
+        public void ChangeSpeed(float newSpeed)
+        {
+            speed = newSpeed;
+        }
+
         public void ChangeRotationSpeed(TimeSpan timeSpan, bool clockwise)
         {
             float sign = 1.0f;
@@ -70,6 +75,11 @@ namespace LightningBug
                 rotationSpeed = maxRotationSpeed;
             else if (rotationSpeed < -maxRotationSpeed)
                 rotationSpeed = -maxRotationSpeed;
+        }
+
+        public void ChangeRotationSpeed(float newSpeed)
+        {
+            rotationSpeed = newSpeed;
         }
 
         void UpdateRotation()
@@ -127,7 +137,7 @@ else
             }
         }
 
-        public string Draw(SpriteBatch spriteBatch, Camera2D camera, Vector2 curScreenPos, Vector2 curScreenDimensions, uint levelWidth, uint levelHeight)
+        public string Draw(SpriteBatch spriteBatch, uint levelWidth, uint levelHeight)
         {
             if(texture == null)
                 return null;

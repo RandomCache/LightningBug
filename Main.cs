@@ -147,6 +147,7 @@ namespace LightningBug
             }
 
             camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+            //camera.StopFollow();
             uiManager.UpdateAll(irr);
             base.Update(gameTime);
         }
@@ -176,6 +177,11 @@ namespace LightningBug
             {
                 playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, true);
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.D0))
+            {
+                playerShip.ChangeSpeed(0);
+                playerShip.ChangeRotationSpeed(0);
+            }
         }
 
         /// <summary>
@@ -197,11 +203,11 @@ namespace LightningBug
             }
 
             if (playerShip != null)
-                playerShip.Draw(spriteBatch, camera, curScreenPos, virtualScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+                playerShip.Draw(spriteBatch, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
 
             foreach (Ship enemy in enemyShips)
             {
-                enemy.Draw(spriteBatch, camera, curScreenPos, virtualScreenDimensions, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+                enemy.Draw(spriteBatch, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             }
 
             Globals.gPrimitives.DrawAllPrimitives(spriteBatch);
@@ -243,11 +249,12 @@ namespace LightningBug
             tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
             tempShip.SetPosition(new Vector2(3000, 2500));
             enemyShips.Add(tempShip);
-
+            /*
             tempShip = new Ship();
             tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
             tempShip.SetPosition(new Vector2(3050, 2200));
             enemyShips.Add(tempShip);
+            */
         }
     }
 }
