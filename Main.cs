@@ -146,10 +146,46 @@ namespace LightningBug
                 enemy.Update();
             }
 
+            MoveObjects();
+
             camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
             //camera.StopFollow();
             uiManager.UpdateAll(irr);
             base.Update(gameTime);
+        }
+
+        // Moves all objects.  Performs collision check beforehand involving objects current and future positions
+        void MoveObjects()
+        {
+            //TODO - Optimize so I'm not checking every object against every other object
+            if (playerShip != null)
+            {
+                // Check against all enemies
+                foreach (Ship enemy in enemyShips)
+                {
+                    Globals.gCollision.CheckShip(playerShip, enemy);
+                }
+                // Lastly check against the level boundries
+                Level curLevel = GetCurLevel();
+
+                playerShip.SetPosition(new Vector2(playerShip.GetPosition().X + playerShip.Velocity.X, playerShip.GetPosition().Y + playerShip.Velocity.Y));
+            }
+            foreach (Ship enemy in enemyShips)
+            {
+                //check against the player then all enemies
+                Globals.gCollision.CheckShip(enemy, playerShip);
+                foreach (Ship enemy2 in enemyShips)
+                {
+                    if (enemy.GetId() == enemy2.GetId())
+                        continue;
+                    Globals.gCollision.CheckShip(enemy, enemy2);
+                }
+                // Lastly check against the level boundries
+                Level curLevel = GetCurLevel();
+
+
+                enemy.SetPosition(new Vector2(enemy.GetPosition().X + enemy.Velocity.X, enemy.GetPosition().Y + enemy.Velocity.Y));
+            }
         }
 
         void HandleInput(GameTime gameTime)
@@ -179,8 +215,8 @@ namespace LightningBug
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D0))
             {
-                playerShip.ChangeSpeed(0);
-                playerShip.ChangeRotationSpeed(0);
+                playerShip.SetSpeed(0);
+                playerShip.SetRotationSpeed(0);
             }
         }
 

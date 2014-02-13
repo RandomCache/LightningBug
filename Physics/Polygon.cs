@@ -61,7 +61,7 @@ namespace LightningBug.Physics
                     ny = vertices[i + 1].Y - vertices[i].Y;
                     normals[i].X = -ny;
                     normals[i].Y = nx;
-                    //normals[i].Normalize();
+                    normals[i].Normalize();
                 }
                 else
                 {
@@ -69,7 +69,7 @@ namespace LightningBug.Physics
                     ny = vertices[0].Y - vertices[i].Y;
                     normals[i].X = -ny;
                     normals[i].Y = nx;
-                    //normals[i].Normalize();
+                    normals[i].Normalize();
                 }
             }
         }

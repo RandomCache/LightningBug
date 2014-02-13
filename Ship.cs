@@ -14,7 +14,6 @@ namespace LightningBug
     public class Ship : Object // TODO Componentize
     {
         private bool mainPlayerShip;
-        public Color testColor = Color.White;
         public string Load(ContentManager content, string texturePath, bool isMainPlayer)
         {
             texture = content.Load<Texture2D>(texturePath);
@@ -27,10 +26,10 @@ namespace LightningBug
             scaledOrigin = new Vector2(rotationOrigin.X * scale.X, rotationOrigin.Y * scale.Y);
             mainPlayerShip = isMainPlayer;
             direction = new Vector2(0, -1);
-            speed = 0;
+            velocity = Vector2.Zero;
             maxSpeed = 5f;
             maxRotationSpeed = 2.0f;
-            accelerationRate = 0.002f; //Increase per millisecond
+            accelerationRate = 0.002f; //Increase per second
             rotationRate = 0.002f; // Degrees per second
             
             rotationAngleRads = 0;
@@ -48,93 +47,30 @@ namespace LightningBug
             return null;
         }
 
-        public void ChangeSpeed(TimeSpan timeSpan, bool increase)
-        {
-            int sign = 1;
-            if(!increase)
-                sign = -1;
-            speed += timeSpan.Milliseconds * accelerationRate * sign;
-            if (speed > maxSpeed)
-                speed = maxSpeed;
-            else if (speed < -maxSpeed)
-                speed = -maxSpeed;
-        }
-
-        public void ChangeSpeed(float newSpeed)
-        {
-            speed = newSpeed;
-        }
-
-        public void ChangeRotationSpeed(TimeSpan timeSpan, bool clockwise)
-        {
-            float sign = 1.0f;
-            if (!clockwise)
-                sign = -1.0f;
-            rotationSpeed += (float)timeSpan.Milliseconds * rotationRate * sign;
-            if (rotationSpeed > maxRotationSpeed)
-                rotationSpeed = maxRotationSpeed;
-            else if (rotationSpeed < -maxRotationSpeed)
-                rotationSpeed = -maxRotationSpeed;
-        }
-
-        public void ChangeRotationSpeed(float newSpeed)
-        {
-            rotationSpeed = newSpeed;
-        }
-
-        void UpdateRotation()
-        {
-            float theta, cs, sn, newX, newY;
-
-            theta = LBMath.DegreesToRad(rotationSpeed);
-            rotationAngleRads += theta;
-            cs = (float)Math.Cos(theta);
-            sn = (float)Math.Sin(theta);
-
-            newX = direction.X * cs - direction.Y * sn;
-            newY = direction.X * sn + direction.Y * cs;
-            direction.X = newX;
-            direction.Y = newY;
-            direction.Normalize();
-        }
-
         //public void UpdatePlayersShip(ref Vector2 curScreenPos)
         public void UpdatePlayersShip()
         {
             UpdateRotation();
+            //velocity.X = direction.X * speed;
+            //velocity.Y = direction.Y * speed;
+
+
+
             // Move the ship based on it's speed and direction
-            float deltaX, deltaY;
-            deltaX = direction.X * speed;
-            deltaY = direction.Y * speed;
             //Logging.Instance(Logging.DEFAULTLOG).Log("UpdatePlayersShip: direction: " + direction.X + ", " + direction.Y + " speed: " + speed + "\n");
             //pos.X += deltaX;
             //pos.Y += deltaY;
-            SetPosition(new Vector2(pos.X + deltaX, pos.Y + deltaY));
             //Logging.Instance(Logging.DEFAULTLOG).Log("UpdatePlayersShip: position: " + xPos + ", " + yPos + "\n");
 
+            /* Commented out during collision response work - 2/10
             // Check collision
-            Globals.gCollision.CheckShip(this);
+            Vector2 collisionOffset = Globals.gCollision.CheckShip(this);
+            UpdateRotation();
+            velocity.X = collisionOffset.X;
+            velocity.Y = collisionOffset.Y;
+            SetPosition(new Vector2(pos.X + velocity.X, pos.Y + velocity.Y));
+            */
             Update();
-        }
-
-        public void Update()
-        {
-            // Add the lines of collision polygons for later drawing
-            foreach (Physics.Polygon poly in collisionPolygons)
-            {
-                for (int i = 0; i < poly.vertices.Length; ++i)
-                {
-                    //TODO change nonRotatedVertices to vertices when rotation is working
-                    if (i == 0)
-                        Globals.gPrimitives.AddLine(poly.vertices[poly.vertexOffests.Length - 1], poly.vertices[i]);
-                    else
-                        Globals.gPrimitives.AddLine(poly.vertices[i - 1], poly.vertices[i]);
-/*if (i == 0)
-    Globals.gPrimitives.AddLine(poly.vertices[poly.vertexOffests.Length - 1], poly.vertexOffests[i]);
-else
-    Globals.gPrimitives.AddLine(poly.vertexOffests[i - 1], poly.vertexOffests[i]);                    */
-                }
-            }
         }
 
         public string Draw(SpriteBatch spriteBatch, uint levelWidth, uint levelHeight)
