@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="BackgroundTile.cs" />
     <Compile Include="Camera2D.cs" />
+    <Compile Include="Debug.cs" />
     <Compile Include="Graphics\Primitives.cs" />
     <Compile Include="Physics\Collision.cs" />
     <Compile Include="Logging.cs" />

@@ -39,6 +39,8 @@ namespace LightningBug
         uint numBackgroundLayers;//, numRows, numColumns;
         bool isLevelLoaded = false;
 
+        public List<Physics.Polygon> collisionPolygons;
+
         public bool IsLevelLoaded() { return isLevelLoaded; }
 
         public uint GetLevelWidth() { return pxWidth; }
@@ -49,12 +51,11 @@ namespace LightningBug
         public Level(ContentManager cm)
         {
             contentManager = cm;
-            //testObj = new Ship();
+            collisionPolygons = new List<Physics.Polygon>();
         }
 
         public string LoadLevel(string fileName, ref Vector2 startingCenterScreenPos)
         {
-            //testObj.Load(contentManager, "Art\\Vehicles\\2dAlienUfo", false);
             isLevelLoaded = false;
             try
             {
@@ -101,6 +102,17 @@ namespace LightningBug
                 } // if (numBackgroundLayers > 0)
                 // TODO verify starting position is in level
                 // TODO verify total level width and height are greater than our max resolution
+
+                Vector2[] offsets = new Vector2[4];
+                offsets[0] = new Vector2(0, 0);
+                offsets[1] = new Vector2(0, pxHeight);
+                offsets[2] = new Vector2(pxWidth, pxHeight);
+                offsets[3] = new Vector2(pxWidth, 0);
+                Physics.Polygon tempPoly = new Physics.Polygon(Vector2.Zero, offsets, Vector2.Zero, 4, true);
+                collisionPolygons.Add(tempPoly);
+                
+                foreach (Physics.Polygon poly in collisionPolygons)
+                    poly.SetPosition(Vector2.Zero, Vector2.Zero, 0);
             }
             catch (Exception ex)
             {

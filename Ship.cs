@@ -17,7 +17,7 @@ namespace LightningBug
         public string Load(ContentManager content, string texturePath, bool isMainPlayer)
         {
             texture = content.Load<Texture2D>(texturePath);
-            pos = new Vector2(0, 0);
+            position = new Vector2(0, 0);
             size.X = 100;
             size.Y = 100;
             
@@ -27,7 +27,7 @@ namespace LightningBug
             mainPlayerShip = isMainPlayer;
             direction = new Vector2(0, -1);
             velocity = Vector2.Zero;
-            maxSpeed = 5f;
+            maxSpeed = 2.0f;
             maxRotationSpeed = 2.0f;
             accelerationRate = 0.002f; //Increase per second
             rotationRate = 0.002f; // Degrees per second
@@ -40,10 +40,10 @@ namespace LightningBug
             offsets[1] = new Vector2(0, size.Y);
             offsets[2] = new Vector2(size.X, size.Y);
             offsets[3] = new Vector2(size.X, 0);
-            Physics.Polygon tempPoly = new Physics.Polygon(pos, offsets, scaledOrigin, 4);
+            Physics.Polygon tempPoly = new Physics.Polygon(position, offsets, scaledOrigin, 4);
             collisionPolygons.Add(tempPoly);
             //ENDTEST
-            SetPosition(pos);
+            SetPosition(position);
             return null;
         }
 
@@ -84,7 +84,7 @@ namespace LightningBug
                 spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
             else
                 spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);*/
-            spriteBatch.Draw(texture, pos, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
+            spriteBatch.Draw(texture, position, null, testColor, rotationAngleRads, rotationOrigin, scale, SpriteEffects.None, 0);
             return null;
         }
 

@@ -14,7 +14,7 @@ namespace LightningBug
         protected long id;
         protected Texture2D texture;
         // scaledOrigin exists because of the shifting spriteBatch.Draw does to the position the sprite is displayed
-        protected Vector2 pos, size, rotationOrigin, scale, scaledOrigin; // position
+        protected Vector2 position, size, rotationOrigin, scale, scaledOrigin; // position
         protected Vector2 direction, velocity; // movement
         //protected Vector2 oldPos; // Position of the object from before it was last changed
         protected float maxSpeed, accelerationRate, rotationSpeed, maxRotationSpeed, rotationRate, rotationAngleRads;
@@ -26,17 +26,16 @@ namespace LightningBug
         public Vector2[] vertices; // CCW oriented
         public Vector2[] normals; // vertices[i] = v[i+1] - v[i]
 
-
+        //public float Speed { get { return speed; } set { speed = value; } }
+        public Vector2 Velocity { get { return velocity; } set { velocity = value; } }
+        public Vector2 Direction { get { return direction; } }
 
         public long GetId() { return id; }
         public Vector2 GetSize() { return size; }
-
-        //public float Speed { get { return speed; } set { speed = value; } }
-        public Vector2 Velocity { get { return velocity; } set { velocity = value; } }
-
-        public Vector2 GetPosition() { return pos; }
-
-        public Vector2 GetCenter() { return pos + scaledOrigin; }
+        public float GetRotation() { return rotationAngleRads; }
+        public float GetRotationSpeed() { return rotationSpeed; }
+        public Vector2 GetPosition() { return position; }
+        public Vector2 GetCenter() { return position + scaledOrigin; }
 
         public Object()
         {
@@ -51,11 +50,11 @@ namespace LightningBug
 
         public void SetPosition(Vector2 newPos) 
         {
-            pos = newPos;
-            vertices[0] = pos;
+            position = newPos;
+            vertices[0] = position;
 
             foreach (Physics.Polygon poly in collisionPolygons)
-                poly.SetPosition(pos, scaledOrigin, rotationAngleRads);
+                poly.SetPosition(position, scaledOrigin, rotationAngleRads);
         }
 
         // Gives impulse to the object in it's current direction
@@ -148,5 +147,17 @@ namespace LightningBug
                 velocity *= maxSpeed;
             }
         }
+
+#if DEBUG
+        // Used only when setting up debug scenarios
+        public void DebugSetup(Vector2 pos, Vector2 dir, Vector2 vel, float rotAngle, float rSpeed)
+        {
+            position = pos;
+            direction = dir;
+            velocity = vel;
+            rotationAngleRads = rotAngle;
+            rotationSpeed = rSpeed;
+        }
+#endif
     }
 }

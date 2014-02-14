@@ -13,14 +13,17 @@ namespace LightningBug.Physics
         public Vector2[] nonRotatedVertices; // CCW oriented.  These are used to calculate the rotated vertice every frame
         public Vector2[] vertices; // CCW oriented
         public Vector2[] normals; // vertices[i] = v[i+1] - v[i]
+        bool reverseNormals; // If this is true the normals will face inward
 
-        public Polygon(Vector2 newPos, Vector2[] offsets, Vector2 scaledOrigin, int numberOfVertices)
+        public Polygon(Vector2 newPos, Vector2[] offsets, Vector2 scaledOrigin, int numberOfVertices, bool reverseNormal = false)
         {
             numVertices = numberOfVertices;
             vertexOffests = new Vector2[numVertices];
             nonRotatedVertices = new Vector2[numVertices];
             vertices = new Vector2[numVertices];
             normals = new Vector2[numVertices];
+            reverseNormals = reverseNormal;
+
             if (offsets.Length != numVertices)
             {
                 Logging.Instance(Logging.DEFAULTLOG).Log("Shapes::Shapes(Vector2 newPos, Vector2[] offests, int numberOfVertices): offests.Length != numVertices\n");
@@ -57,16 +60,32 @@ namespace LightningBug.Physics
                 nx = ny = 0;
                 if (i < vertices.Length - 1)
                 {
-                    nx = vertices[i + 1].X - vertices[i].X;
-                    ny = vertices[i + 1].Y - vertices[i].Y;
+                    if (!reverseNormals)
+                    {
+                        nx = vertices[i + 1].X - vertices[i].X;
+                        ny = vertices[i + 1].Y - vertices[i].Y;
+                    }
+                    else
+                    {
+                        nx = vertices[i].X - vertices[i + 1].X;
+                        ny = vertices[i].Y - vertices[i + 1].Y;
+                    }
                     normals[i].X = -ny;
                     normals[i].Y = nx;
                     normals[i].Normalize();
                 }
                 else
                 {
-                    nx = vertices[0].X - vertices[i].X;
-                    ny = vertices[0].Y - vertices[i].Y;
+                    if (!reverseNormals)
+                    {
+                        nx = vertices[0].X - vertices[i].X;
+                        ny = vertices[0].Y - vertices[i].Y;
+                    }
+                    else
+                    {
+                        nx = vertices[i].X - vertices[0].X;
+                        ny = vertices[i].Y - vertices[0].Y;
+                    }
                     normals[i].X = -ny;
                     normals[i].Y = nx;
                     normals[i].Normalize();

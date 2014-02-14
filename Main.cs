@@ -16,6 +16,9 @@ namespace LightningBug
         public static Collision gCollision;
         public static Dictionary<string, SpriteFont> gFonts;
         public static Graphics.Primitives gPrimitives;
+#if DEBUG
+        public static Debug gDebug;
+#endif
     }
     
     /// <summary>
@@ -54,6 +57,9 @@ namespace LightningBug
             Globals.gCollision = Collision.Instance(this);
             Globals.gFonts = new Dictionary<string, SpriteFont>();
             Globals.gPrimitives = new Graphics.Primitives();
+#if DEBUG
+            Globals.gDebug = new Debug();
+#endif
 
             uiManager = new UI.UIManager();
             playerShip = new Ship();
@@ -157,6 +163,7 @@ namespace LightningBug
         // Moves all objects.  Performs collision check beforehand involving objects current and future positions
         void MoveObjects()
         {
+            Level curLevel = GetCurLevel();
             //TODO - Optimize so I'm not checking every object against every other object
             if (playerShip != null)
             {
@@ -166,7 +173,7 @@ namespace LightningBug
                     Globals.gCollision.CheckShip(playerShip, enemy);
                 }
                 // Lastly check against the level boundries
-                Level curLevel = GetCurLevel();
+                Globals.gCollision.CheckShip(playerShip, curLevel);
 
                 playerShip.SetPosition(new Vector2(playerShip.GetPosition().X + playerShip.Velocity.X, playerShip.GetPosition().Y + playerShip.Velocity.Y));
             }
@@ -181,11 +188,18 @@ namespace LightningBug
                     Globals.gCollision.CheckShip(enemy, enemy2);
                 }
                 // Lastly check against the level boundries
-                Level curLevel = GetCurLevel();
-
+                Globals.gCollision.CheckShip(enemy, curLevel);
 
                 enemy.SetPosition(new Vector2(enemy.GetPosition().X + enemy.Velocity.X, enemy.GetPosition().Y + enemy.Velocity.Y));
             }
+#if DEBUG
+            if (float.IsNaN(playerShip.GetPosition().X))
+                System.Diagnostics.Debugger.Break();
+            Globals.gDebug.player.states[1] = Globals.gDebug.player.states[0];
+            Globals.gDebug.player.SetCurrentState(playerShip);
+            Globals.gDebug.enemy.states[1] = Globals.gDebug.enemy.states[0];
+            Globals.gDebug.enemy.SetCurrentState(enemyShips[0]);
+#endif
         }
 
         void HandleInput(GameTime gameTime)
@@ -291,6 +305,9 @@ namespace LightningBug
             tempShip.SetPosition(new Vector2(3050, 2200));
             enemyShips.Add(tempShip);
             */
+#if DEBUG
+            //playerShip.DebugSetup(new Vector2(2890.771f, 2477.647f), new Vector2(0.8470135f, -0.5315714f), Vector2.Zero, -5.27282f, 0.002f);
+#endif
         }
     }
 }
