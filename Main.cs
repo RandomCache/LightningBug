@@ -1,6 +1,8 @@
 ﻿#region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,6 +13,13 @@ using Microsoft.Xna.Framework.GamerServices;
 
 namespace LightningBug
 {
+    public enum LevelType { Space, Planet };
+
+    public struct ScreenInfo
+    {
+        public Vector2 curScreenCenter, curScreenPos, screenDimensions, virtualScreenDimensions;
+    }
+
     public class Globals 
     { 
         public static Collision gCollision;
@@ -31,22 +40,19 @@ namespace LightningBug
         SpriteBatch spriteBatch;
         UI.UIManager uiManager;
         private ResolutionRenderer irr;
-        private Camera2D camera;
+        ScreenInfo screenInfo;
+        
 
         string startupPath, slnDir;
 
         private Texture2D background;
 
-        private Level curLevel;
-        private Ship playerShip; // Move player and/or enemy ships to a controlling class?
-        public List<Ship> enemyShips;
+        private Levels.SpaceLevel spaceLevel;
+        private Levels.IsoLevel isoLevel;
+        LevelType curLevelType;
 
-        Vector2 curScreenCenter, curScreenPos, screenDimensions, virtualScreenDimensions;
-
-#region properties
-        public Level GetCurLevel()  { return curLevel; }
-        public Ship GetPlayersShip() { return playerShip; }
-#endregion
+        private SpaceManager spaceManager;
+        private IsoManager isoManager;
 
         public LightningBug()
             : base()
@@ -62,8 +68,6 @@ namespace LightningBug
 #endif
 
             uiManager = new UI.UIManager();
-            playerShip = new Ship();
-            enemyShips = new List<Ship>();
         }
 
         /// <summary>
@@ -80,26 +84,29 @@ namespace LightningBug
             graphics.PreferredBackBufferWidth = 1280;
             graphics.PreferredBackBufferHeight = 720;
 
-            virtualScreenDimensions.X = 1920;
-            virtualScreenDimensions.Y = 1080;
+            screenInfo.virtualScreenDimensions.X = 1920;
+            screenInfo.virtualScreenDimensions.Y = 1080;
 
             // Camera and Independent Resolution Renderer Setup
-            irr = new ResolutionRenderer(this, (int)virtualScreenDimensions.X, (int)virtualScreenDimensions.Y, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-            camera = new Camera2D(irr) { MaxZoom = 2f, MinZoom = 1f, Zoom = 1f };
-            camera.SetPosition(Vector2.Zero);
-            camera.RecalculateTransformationMatrices();
+            irr = new ResolutionRenderer(this, (int)screenInfo.virtualScreenDimensions.X,
+                (int)screenInfo.virtualScreenDimensions.Y, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+
             // Move the window.  TODO center the window in the users screen
             System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(this.Window.Handle);
             form.Location = new System.Drawing.Point(0, 0);
 
             graphics.ApplyChanges();
 
-            curScreenCenter = new Vector2();
-            curLevel = new Level(Content);
+            screenInfo.curScreenCenter = new Vector2();
+            spaceLevel = new Levels.SpaceLevel(Content);
+            isoLevel = new Levels.IsoLevel(Content);
+
+            spaceManager = new SpaceManager();
+            isoManager = new IsoManager();
 
             // Get current resolution of the viewport         
-            screenDimensions.X = GraphicsDevice.Viewport.Width;
-            screenDimensions.Y = GraphicsDevice.Viewport.Height;
+            screenInfo.screenDimensions.X = GraphicsDevice.Viewport.Width;
+            screenInfo.screenDimensions.Y = GraphicsDevice.Viewport.Height;
 
             Globals.gPrimitives.Init(graphics.GraphicsDevice);
 
@@ -110,16 +117,18 @@ namespace LightningBug
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
+        // TODO implement a level/area content loading system
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             string test = slnDir + "\\Art\\blank.bmp";
             test = "\\..\\..\\..Art\\blank.bmp";
+
             //@TODO try catch around the loading
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
             uiManager.Load(Content, "test");
-            ChangeLevel("test");
+            ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
         }
 
         /// <summary>
@@ -143,64 +152,25 @@ namespace LightningBug
 
             HandleInput(gameTime);
 
-            if (playerShip != null)
-            {
-                playerShip.UpdatePlayersShip();
-            }
-            foreach (Ship enemy in enemyShips)
-            {
-                enemy.Update();
-            }
+            if (curLevelType == LevelType.Space)
+                spaceManager.Update(gameTime);
+            else if (curLevelType == LevelType.Planet)
+                isoManager.Update(gameTime);
 
-            MoveObjects();
-
-            camera.Update(gameTime, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
+ 
             //camera.StopFollow();
             uiManager.UpdateAll(irr);
             base.Update(gameTime);
         }
-
+        /*
         // Moves all objects.  Performs collision check beforehand involving objects current and future positions
         void MoveObjects()
         {
-            Level curLevel = GetCurLevel();
-            //TODO - Optimize so I'm not checking every object against every other object
-            if (playerShip != null)
-            {
-                // Check against all enemies
-                foreach (Ship enemy in enemyShips)
-                {
-                    Globals.gCollision.CheckShip(playerShip, enemy);
-                }
-                // Lastly check against the level boundries
-                Globals.gCollision.CheckShip(playerShip, curLevel);
-
-                playerShip.SetPosition(new Vector2(playerShip.GetPosition().X + playerShip.Velocity.X, playerShip.GetPosition().Y + playerShip.Velocity.Y));
-            }
-            foreach (Ship enemy in enemyShips)
-            {
-                //check against the player then all enemies
-                Globals.gCollision.CheckShip(enemy, playerShip);
-                foreach (Ship enemy2 in enemyShips)
-                {
-                    if (enemy.GetId() == enemy2.GetId())
-                        continue;
-                    Globals.gCollision.CheckShip(enemy, enemy2);
-                }
-                // Lastly check against the level boundries
-                Globals.gCollision.CheckShip(enemy, curLevel);
-
-                enemy.SetPosition(new Vector2(enemy.GetPosition().X + enemy.Velocity.X, enemy.GetPosition().Y + enemy.Velocity.Y));
-            }
-#if DEBUG
-            if (float.IsNaN(playerShip.GetPosition().X))
-                System.Diagnostics.Debugger.Break();
-            Globals.gDebug.player.states[1] = Globals.gDebug.player.states[0];
-            Globals.gDebug.player.SetCurrentState(playerShip);
-            Globals.gDebug.enemy.states[1] = Globals.gDebug.enemy.states[0];
-            Globals.gDebug.enemy.SetCurrentState(enemyShips[0]);
-#endif
-        }
+            if (curLevelType == LevelType.Space)
+                spaceManager.MoveObjects();
+            else if (curLevelType == LevelType.Planet)
+                isoManager.MoveObjects();
+        }*/
 
         void HandleInput(GameTime gameTime)
         {
@@ -211,27 +181,10 @@ namespace LightningBug
             {
                 ChangeLevel("test");
             }*/
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                playerShip.ChangeSpeed(gameTime.ElapsedGameTime, true);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                playerShip.ChangeSpeed(gameTime.ElapsedGameTime, false);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, false);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, true);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.D0))
-            {
-                playerShip.SetSpeed(0);
-                playerShip.SetRotationSpeed(0);
-            }
+            if (curLevelType == LevelType.Space)
+                spaceManager.HandleInput(gameTime);
+            if (curLevelType == LevelType.Planet)
+                isoManager.HandleInput(gameTime);
         }
 
         /// <summary>
@@ -240,28 +193,10 @@ namespace LightningBug
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            //Prepare IRR call
-            irr.Draw();
-
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, camera.GetViewTransformationMatrix());
-            //IRR only - mBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone, null, renderer.GetTransformationMatrix());
-            // If we're in a level draw that level
-            if (curLevel != null && curLevel.IsLevelLoaded())
-            {
-                curLevel.DrawLevel(spriteBatch, camera, curScreenPos, screenDimensions);
-            }
-
-            if (playerShip != null)
-                playerShip.Draw(spriteBatch, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
-
-            foreach (Ship enemy in enemyShips)
-            {
-                enemy.Draw(spriteBatch, curLevel.GetLevelWidth(), curLevel.GetLevelHeight());
-            }
-
-            Globals.gPrimitives.DrawAllPrimitives(spriteBatch);
-            spriteBatch.End();
+            if (curLevelType == LevelType.Space)
+                spaceManager.Draw(spriteBatch, GraphicsDevice, gameTime, screenInfo);
+            if (curLevelType == LevelType.Planet)
+                isoManager.Draw(spriteBatch, GraphicsDevice, gameTime, screenInfo);
 
             //For Drawing UI: Reset screen viewport back to full size
             //so we can draw text from the TopLeft corner of the real screen
@@ -269,45 +204,63 @@ namespace LightningBug
             spriteBatch.Begin();
             uiManager.Draw(spriteBatch);
             spriteBatch.End();
-
             base.Draw(gameTime);
+        }
+
+        public LevelType CheckLevelTypeFromFile(XDocument xDoc)
+        {
+            XElement curElement;
+            curElement = xDoc.Root.Element("BasicInfo");
+            if (curElement == null)
+            {
+                Logging.Instance(Logging.DEFAULTLOG).Log("Main::CheckLevelTypeFromFile - Bad level loaded. \n");
+                Exit();
+            }
+            string type = curElement.Element("Type").Value;
+            if (type == "Space")
+                return LevelType.Space;
+            else if (type == "Planet")
+                return LevelType.Planet;
+            else
+            {
+                Logging.Instance(Logging.DEFAULTLOG).Log("Main::CheckLevelTypeFromFile - Unrecognized level type. \n");
+                Exit();
+                return LevelType.Space;
+            }
         }
 
         public void ChangeLevel(string newLevel)
         {
-            if (curLevel != null)
-                curLevel.UnloadLevel();
-            curLevel.LoadLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml", ref curScreenCenter);
-            // Set the current screen position
-            curScreenPos.X = (int)(curScreenCenter.X - (virtualScreenDimensions.X / 2));
-            curScreenPos.Y = (int)(curScreenCenter.Y - (virtualScreenDimensions.Y / 2));
-            background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
+            // Determine what type of level the new one is
+            XDocument xDoc = XDocument.Load(newLevel);
+            if (xDoc == null)
+            {
+                Logging.Instance(Logging.DEFAULTLOG).Log("Main::ChangeLevel - Bad level loaded. \n");
+                Exit();
+            }
+            LevelType levelType = CheckLevelTypeFromFile(xDoc);
+            if (levelType == LevelType.Space)
+            {
+                if (spaceLevel != null)
+                    spaceLevel.UnloadLevel();
+                spaceLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
 
-            if (playerShip == null)
-            playerShip = new Ship();
-            playerShip.Load(Content, "Art\\Vehicles\\SampleShip", true);
+                // Set the current screen position
+                screenInfo.curScreenPos.X = (int)(screenInfo.curScreenCenter.X - (screenInfo.virtualScreenDimensions.X / 2));
+                screenInfo.curScreenPos.Y = (int)(screenInfo.curScreenCenter.Y - (screenInfo.virtualScreenDimensions.Y / 2));
+                background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
 
-            Vector2 newShipPos = curScreenCenter;
-            // Go from the center of the screen to the ship position, top left of it.
-            newShipPos.X -= playerShip.GetSize().X / 2;
-            newShipPos.Y -= playerShip.GetSize().Y / 2;
-            playerShip.Reset(newShipPos);
-            camera.StartFollow(playerShip);
-
-            // Load enemies
-            Ship tempShip = new Ship();
-            tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
-            tempShip.SetPosition(new Vector2(3000, 2500));
-            enemyShips.Add(tempShip);
-            /*
-            tempShip = new Ship();
-            tempShip.Load(Content, "Art\\Vehicles\\2dAlienUfo", false);
-            tempShip.SetPosition(new Vector2(3050, 2200));
-            enemyShips.Add(tempShip);
-            */
-#if DEBUG
-            //playerShip.DebugSetup(new Vector2(2890.771f, 2477.647f), new Vector2(0.8470135f, -0.5315714f), Vector2.Zero, -5.27282f, 0.002f);
-#endif
+                spaceManager.Initialize(irr);
+                spaceManager.UpdateLevel(spaceLevel);
+                spaceManager.SetupNewLevel(Content, screenInfo);
+            }
+            else if (levelType == LevelType.Planet)
+            {
+                isoManager.Initialize();
+                if (!isoManager.LoadIsoContent(graphics, Content))
+                    Exit();
+                isoManager.UpdateLevel(isoLevel);
+            }                
         }
     }
 }

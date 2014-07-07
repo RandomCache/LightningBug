@@ -24,9 +24,9 @@ TileSize
 Objects*[]
 */
 
-namespace LightningBug
+namespace LightningBug.Levels
 {
-    public class Level
+    public class SpaceLevel
     {
         private ContentManager contentManager;
         BackgroundTile[][][] backgrounds; //[num of layers][num of tiles in a row][num of tiles in a column]
@@ -48,18 +48,18 @@ namespace LightningBug
 
         //Ship testObj;
 
-        public Level(ContentManager cm)
+        public SpaceLevel(ContentManager cm)
         {
             contentManager = cm;
             collisionPolygons = new List<Physics.Polygon>();
         }
 
-        public string LoadLevel(string fileName, ref Vector2 startingCenterScreenPos)
+        public string LoadLevel(XDocument xDoc, ref Vector2 startingCenterScreenPos)
         {
             isLevelLoaded = false;
             try
             {
-                XDocument xDoc = XDocument.Load(fileName);
+                //XDocument xDoc = XDocument.Load(fileName);
                 XElement curElement, childElement;
                 curElement = xDoc.Root.Element("BasicInfo");
                 levelName = curElement.Element("Name").Value;
@@ -130,13 +130,13 @@ namespace LightningBug
             return null;
         }
 
-        public string DrawLevel(SpriteBatch sb, Camera2D camera, Vector2 curScreenPos, Vector2 curScreenDimensions)
+        public string DrawLevel(SpriteBatch sb, Camera2D camera, ScreenInfo screenInfo)
         {
             if (sb == null)
                 return "Level.DrawLevel - Error: Null SpriteBatch\n";
 
             Vector2 topLeft = camera.ToVirtual(Vector2.Zero, false);
-            Vector2 bottomRight = camera.ToVirtual(curScreenDimensions, false);
+            Vector2 bottomRight = camera.ToVirtual(screenInfo.screenDimensions, false);
 
             uint numColumns, numRows;
             int curTileWidth = 0, curTileHeight = 0;

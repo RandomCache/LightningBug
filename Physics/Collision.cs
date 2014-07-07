@@ -25,7 +25,7 @@ namespace LightningBug
         }
 
         // Checks collision of the given object against the edges of the level
-        public void CheckShip(Object toCheck, Level level)
+        public void CheckShip(Object toCheck, Levels.SpaceLevel level)
         {
             bool currentHit = false;
             Vector2 translationVector, centerDiff;

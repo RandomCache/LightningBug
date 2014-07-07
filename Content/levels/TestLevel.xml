@@ -1,6 +1,7 @@
 ﻿<LightningBugLevel>
 	<BasicInfo>
     <Name>Test1</Name>
+	<Type>Space</Type>
     <Width>20000</Width>
     <Height>20000</Height>
     <StartingScreenPos>

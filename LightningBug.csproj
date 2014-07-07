@@ -38,11 +38,18 @@
     <Compile Include="BackgroundTile.cs" />
     <Compile Include="Camera2D.cs" />
     <Compile Include="Debug.cs" />
+    <Compile Include="Levels\Isometric\IsoCamera.cs" />
+    <Compile Include="Levels\Isometric\IsoLevel.cs" />
+    <Compile Include="Levels\Isometric\MapCell.cs" />
+    <Compile Include="Levels\Isometric\Tile.cs" />
+    <Compile Include="Levels\Isometric\TileMap.cs" />
     <Compile Include="Graphics\Primitives.cs" />
+    <Compile Include="Managers\IsoManager.cs" />
+    <Compile Include="Managers\SpaceManager.cs" />
     <Compile Include="Physics\Collision.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Level.cs" />
+    <Compile Include="Levels\Space\SpaceLevel.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="Object.cs" />
     <Compile Include="Physics\Polygon.cs" />
@@ -70,7 +77,9 @@
       <Name>MonoGame.Framework.Windows</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Content\Tilesets\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Content\Fonts\Miramonte.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

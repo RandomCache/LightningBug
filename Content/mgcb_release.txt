@@ -4,6 +4,8 @@
 /rebuild
 
 # Build a texture
+/build:..\Content\Tilesets\temp_groung_tileset_01.png
+/build:..\Content\Tilesets\hilight.png
 /build:..\Content\Art\Blank.bmp
 /build:..\Content\Art\Vehicles\SampleShip.png
 /build:..\Content\Art\Vehicles\2dAlienUfo.png
