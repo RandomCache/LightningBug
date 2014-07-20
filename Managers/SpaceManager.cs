@@ -19,6 +19,12 @@ namespace LightningBug
 
         #region properties
         public Ship GetPlayersShip() { return playerShip; }
+
+        public Levels.SpaceLevel CurLevel
+        {
+            get { return curLevel; }
+            set { curLevel = CurLevel; }
+        }
         #endregion
 
         public SpaceManager()
@@ -28,12 +34,13 @@ namespace LightningBug
             enemyShips = new List<Ship>();
         }
 
-        public void Initialize(ResolutionRenderer pIrr)
+        public void Initialize(ResolutionRenderer pIrr, ContentManager cm)
         {
             irr = pIrr;
             camera = new Camera2D(irr) { MaxZoom = 2f, MinZoom = 1f, Zoom = 1f };
             camera.SetPosition(Vector2.Zero);
             camera.RecalculateTransformationMatrices();
+            curLevel = new Levels.SpaceLevel(cm);
         }
 
         public void UpdateLevel(Levels.SpaceLevel newLevel)

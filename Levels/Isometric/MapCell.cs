@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LightningBug.Isometric
 {
-    class MapCell
+    public class MapCell
     {
         public int TileID
         {

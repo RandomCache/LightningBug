@@ -11,35 +11,33 @@ namespace LightningBug
 {
     public class IsoManager
     {
-        Isometric.TileMap myMap;
-        int squaresAcross;
-        int squaresDown;
-        int baseOffsetX;
-        int baseOffsetY;
-        float heightRowDepthMod;
         Texture2D hilight;
         Levels.IsoLevel curLevel;
+
+        public Levels.IsoLevel CurLevel
+        {
+            get { return curLevel; }
+            set { curLevel = CurLevel; }
+        }
 
         public IsoManager()
         {
             curLevel = null;
         }
 
-        public void Initialize()
-        {            
-            squaresAcross = 17;
-            squaresDown = 37;
-            baseOffsetX = baseOffsetY = -14;
-            heightRowDepthMod = 0.0000001f;
+        public void Initialize(ContentManager cm)
+        {
+            curLevel = new Levels.IsoLevel(cm);
         }
 
         public bool LoadIsoContent(GraphicsDeviceManager gdm, ContentManager cm)
         {
-            Isometric.Tile.TileSetTexture = cm.Load<Texture2D>(@"Textures\TileSets\temp_groung_tileset_01.png");
-            hilight = cm.Load<Texture2D>(@"Textures\TileSets\hilight");
-            myMap = new Isometric.TileMap();
+            Isometric.Tile.TileSetTexture = cm.Load<Texture2D>(@"TileSets\temp_groung_tileset_01");
+            //texture = content.Load<Texture2D>(Art\\Vehicles\\SampleShip);
+            hilight = cm.Load<Texture2D>(@"TileSets\hilight");
+            curLevel.Tiles = new Isometric.TileMap();
 
-            if (gdm == null || myMap == null)
+            if (gdm == null || curLevel.Tiles == null)
             {
                 Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadIsoContent - No graphics device manager or myMap. \n");
                 return false;
@@ -47,9 +45,9 @@ namespace LightningBug
 
             Isometric.IsoCamera.ViewWidth = gdm.PreferredBackBufferWidth;
             Isometric.IsoCamera.ViewHeight = gdm.PreferredBackBufferHeight;
-            Isometric.IsoCamera.WorldWidth = ((myMap.MapWidth - 2) * Isometric.Tile.TileStepX);
-            Isometric.IsoCamera.WorldHeight = ((myMap.MapHeight - 2) * Isometric.Tile.TileStepY);
-            Isometric.IsoCamera.DisplayOffset = new Vector2(baseOffsetX, baseOffsetY);
+            Isometric.IsoCamera.WorldWidth = ((curLevel.Tiles.MapWidth - 2) * Isometric.Tile.TileStepX);
+            Isometric.IsoCamera.WorldHeight = ((curLevel.Tiles.MapHeight - 2) * Isometric.Tile.TileStepY);
+            Isometric.IsoCamera.DisplayOffset = new Vector2(curLevel.BaseOffsetX, curLevel.BaseOffsetY);
 
             return true;
         }
@@ -61,6 +59,26 @@ namespace LightningBug
 
         public void HandleInput(GameTime gameTime)
         {
+            KeyboardState ks = Keyboard.GetState();
+            if (ks.IsKeyDown(Keys.Left))
+            {
+                Isometric.IsoCamera.Move(new Vector2(-2, 0));
+            }
+
+            if (ks.IsKeyDown(Keys.Right))
+            {
+                Isometric.IsoCamera.Move(new Vector2(2, 0));
+            }
+
+            if (ks.IsKeyDown(Keys.Up))
+            {
+                Isometric.IsoCamera.Move(new Vector2(0, -2));
+            }
+
+            if (ks.IsKeyDown(Keys.Down))
+            {
+                Isometric.IsoCamera.Move(new Vector2(0, 2));
+            }
         }
 
         public void Update(GameTime gameTime)
@@ -85,24 +103,24 @@ namespace LightningBug
             int offsetX = (int)squareOffset.X;
             int offsetY = (int)squareOffset.Y;
 
-            float maxdepth = ((myMap.MapWidth + 1) + ((myMap.MapHeight + 1) * Isometric.Tile.TileWidth)) * 10;
+            float maxdepth = ((curLevel.Tiles.MapWidth + 1) + ((curLevel.Tiles.MapHeight + 1) * Isometric.Tile.TileWidth)) * 10;
             float depthOffset;
 
-            for (int y = 0; y < squaresDown; y++)
+            for (int y = 0; y < curLevel.TilesHigh; y++)
             {
                 int rowOffset = 0;
                 if ((firstY + y) % 2 == 1)
                     rowOffset = Isometric.Tile.OddRowXOffset;
 
-                for (int x = 0; x < squaresAcross; x++)
+                for (int x = 0; x < curLevel.TilesWide; x++)
                 {
                     int mapx = (firstX + x);
                     int mapy = (firstY + y);
                     depthOffset = 0.7f - ((mapx + (mapy * Isometric.Tile.TileWidth)) / maxdepth);
-                    
-                    if ((mapx >= myMap.MapWidth) || (mapy >= myMap.MapHeight))
+
+                    if ((mapx >= curLevel.Tiles.MapWidth) || (mapy >= curLevel.Tiles.MapHeight))
                         continue;
-                    foreach (int tileID in myMap.Rows[mapy].Columns[mapx].BaseTiles)
+                    foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].BaseTiles)
                     {
                         spriteBatch.Draw(Isometric.Tile.TileSetTexture, Isometric.IsoCamera.WorldToScreen(new Vector2((mapx * Isometric.Tile.TileStepX) + rowOffset,
                             mapy * Isometric.Tile.TileStepY)), Isometric.Tile.GetSourceRectangle(tileID), Color.White,
@@ -110,19 +128,19 @@ namespace LightningBug
                     }
                     int heightRow = 0;
 
-                    foreach (int tileID in myMap.Rows[mapy].Columns[mapx].HeightTiles)
+                    foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].HeightTiles)
                     {
                         spriteBatch.Draw(Isometric.Tile.TileSetTexture, Isometric.IsoCamera.WorldToScreen(new Vector2((mapx * Isometric.Tile.TileStepX) + rowOffset,
                                     mapy * Isometric.Tile.TileStepY - (heightRow * Isometric.Tile.HeightTileOffset))), Isometric.Tile.GetSourceRectangle(tileID),
-                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, depthOffset - ((float)heightRow * heightRowDepthMod));
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, depthOffset - ((float)heightRow * curLevel.HeightRowDepthMod));
                         heightRow++;
                     }
 
-                    foreach (int tileID in myMap.Rows[mapy].Columns[mapx].Props)
+                    foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].Props)
                     {
                         spriteBatch.Draw(Isometric.Tile.TileSetTexture, Isometric.IsoCamera.WorldToScreen(new Vector2((mapx * Isometric.Tile.TileStepX) + rowOffset,
                                     mapy * Isometric.Tile.TileStepY - (heightRow * Isometric.Tile.HeightTileOffset))), Isometric.Tile.GetSourceRectangle(tileID),
-                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, depthOffset - ((float)heightRow * heightRowDepthMod));
+                            Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, depthOffset - ((float)heightRow * curLevel.HeightRowDepthMod));
                         heightRow++;
                     }
 
@@ -143,7 +161,7 @@ namespace LightningBug
             vlad.Draw(spriteBatch, 0, -vladHeight);
             */
             Vector2 hilightLoc = Isometric.IsoCamera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
-            Vector2 hilightPoint = myMap.WorldToMapCell(new Vector2((int)hilightLoc.X, (int)hilightLoc.Y), out tempOut);
+            Vector2 hilightPoint = curLevel.Tiles.WorldToMapCell(new Vector2((int)hilightLoc.X, (int)hilightLoc.Y), out tempOut);
 
             int hilightrowOffset = 0;
             if ((hilightPoint.Y) % 2 == 1)

@@ -47,8 +47,8 @@ namespace LightningBug
 
         private Texture2D background;
 
-        private Levels.SpaceLevel spaceLevel;
-        private Levels.IsoLevel isoLevel;
+        //private Levels.SpaceLevel spaceLevel;
+        //private Levels.IsoLevel isoLevel;
         LevelType curLevelType;
 
         private SpaceManager spaceManager;
@@ -98,8 +98,8 @@ namespace LightningBug
             graphics.ApplyChanges();
 
             screenInfo.curScreenCenter = new Vector2();
-            spaceLevel = new Levels.SpaceLevel(Content);
-            isoLevel = new Levels.IsoLevel(Content);
+            //spaceLevel = new Levels.SpaceLevel(Content);
+            //isoLevel = new Levels.IsoLevel(Content);
 
             spaceManager = new SpaceManager();
             isoManager = new IsoManager();
@@ -128,7 +128,8 @@ namespace LightningBug
             //@TODO try catch around the loading
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
             uiManager.Load(Content, "test");
-            ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
+            //ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
+            ChangeLevel("..\\..\\..\\Content\\Levels\\TestIsoLevel.xml");
         }
 
         /// <summary>
@@ -239,27 +240,29 @@ namespace LightningBug
                 Exit();
             }
             LevelType levelType = CheckLevelTypeFromFile(xDoc);
+            curLevelType = levelType;
             if (levelType == LevelType.Space)
             {
-                if (spaceLevel != null)
-                    spaceLevel.UnloadLevel();
-                spaceLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
+                if (spaceManager.CurLevel != null)
+                    spaceManager.CurLevel.UnloadLevel();
+                spaceManager.CurLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
 
                 // Set the current screen position
                 screenInfo.curScreenPos.X = (int)(screenInfo.curScreenCenter.X - (screenInfo.virtualScreenDimensions.X / 2));
                 screenInfo.curScreenPos.Y = (int)(screenInfo.curScreenCenter.Y - (screenInfo.virtualScreenDimensions.Y / 2));
                 background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
 
-                spaceManager.Initialize(irr);
-                spaceManager.UpdateLevel(spaceLevel);
+                spaceManager.Initialize(irr, Content);
+                spaceManager.UpdateLevel(spaceManager.CurLevel);
                 spaceManager.SetupNewLevel(Content, screenInfo);
             }
             else if (levelType == LevelType.Planet)
             {
-                isoManager.Initialize();
+                isoManager.Initialize(Content);
                 if (!isoManager.LoadIsoContent(graphics, Content))
                     Exit();
-                isoManager.UpdateLevel(isoLevel);
+                isoManager.CurLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
+                isoManager.UpdateLevel(isoManager.CurLevel);
             }                
         }
     }

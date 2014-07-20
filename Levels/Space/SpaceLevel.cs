@@ -53,7 +53,7 @@ namespace LightningBug.Levels
             contentManager = cm;
             collisionPolygons = new List<Physics.Polygon>();
         }
-
+        // TODO change return type to void?
         public string LoadLevel(XDocument xDoc, ref Vector2 startingCenterScreenPos)
         {
             isLevelLoaded = false;
