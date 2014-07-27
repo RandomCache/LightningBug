@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace LightningBug.UI
 {
@@ -23,11 +24,18 @@ namespace LightningBug.UI
         string curScene;
         UIElementSorter sorter;
 
+        // Hover & tooltip
+        DisplayRect curHoverElement; // The element, if not null, that the mouse is hovering over.
+        TimeSpan startHoverTime; // The time the hover on curHoverElement began
+        TimeSpan toolTipHoverTime = TimeSpan.FromMilliseconds(3000); // 3000 ms
+        DisplayRect toolTip;
+
         public UIManager()
         {
             UIObjects = new List<UI.DisplayRect>();
             curScene = string.Empty;
             sorter = new UIElementSorter();
+            curHoverElement = null;
         }
 
         public void Load(ContentManager content, string newScene)
@@ -56,11 +64,79 @@ namespace LightningBug.UI
             UIObjects.Clear();
         }
 
+        // Returns true if the user selected an UI element.
+        public bool HandleInput(ResolutionRenderer irr, GameTime gameTime, MouseState ms)
+        {
+            // Check to see if the mouse is hovering over any UI elements
+            bool hovering = false;
+            foreach (UI.DisplayRect dRect in UIObjects)
+            {
+                if (dRect.IsPointInside(ms.Position))
+                {
+                    hovering = true;
+                    // Set hover element.  If it's this element see if the hover time has passed the min.
+                    if (curHoverElement != null && curHoverElement == dRect)
+                    {
+                        if (toolTip == null && gameTime.TotalGameTime - startHoverTime >= toolTipHoverTime)
+                        {
+                            string testHover = "Test Hover";
+                            // Create hover element.
+                            CreateTooltip(irr, ms.Position, testHover);
+                        }
+                    }
+                    // If it's a new element, set that and reset the timer
+                    else
+                    {
+                        curHoverElement = dRect;
+                        startHoverTime = gameTime.TotalGameTime;
+                        if (toolTip != null)
+                        {
+                            UIObjects.Remove(toolTip);
+                            toolTip = null;
+                        }
+                    }
+                    break;
+                }                
+            }
+            if (!hovering)
+            {
+                // Reset the hovering timer anytime the cursor isn't hovering over anything
+                startHoverTime = gameTime.TotalGameTime;
+                // If a tooltip is currently active and the cursor isn't hovering over anything destroy the active tooltip
+                if (toolTip != null)
+                {
+                    UIObjects.Remove(toolTip);
+                    toolTip = null;
+                }
+            }
+
+            // If there's a click, activate the appropriate UI element
+            return false;
+        }
+
+        private void CreateTooltip(ResolutionRenderer irr, Point mousePos, String text)
+        {
+            // Find the length of the tooptip
+            SpriteFont tempFont = Globals.gFonts["Miramonte"];
+            if (tempFont == null)
+                return;
+            Vector2 tempSize = tempFont.MeasureString(text);
+            // Find the distance from the current position to the right side of the screen and move the tooltip left to compensate
+            float rightOfText = mousePos.X + tempSize.X;
+            float xDiff = 0;
+            if (rightOfText > irr.ScreenWidth)
+                xDiff = rightOfText - irr.ScreenWidth;
+            toolTip = new DisplayRect("Test Hover", new Vector2(200, 50), new Vector2(mousePos.X - xDiff, mousePos.Y), ScreenPositions.None);
+            toolTip.Depth = 0;
+            UIObjects.Add(toolTip);
+        }
+
         public void UpdateAll(ResolutionRenderer irr)
         {
             foreach (UI.DisplayRect dRect in UIObjects)
             {
-                dRect.Update(irr);
+                if(dRect != null)
+                    dRect.Update(irr);
             }
         }
 
@@ -68,7 +144,8 @@ namespace LightningBug.UI
         {
             foreach(UI.DisplayRect dRect in UIObjects)
             {
-                dRect.Draw(sb);
+                if (dRect != null)
+                    dRect.Draw(sb);
             }
         }
     }

@@ -13,6 +13,9 @@ namespace LightningBug
     {
         Texture2D hilight;
         Levels.IsoLevel curLevel;
+        Vector2 hilightPoint;
+
+        Levels.IsoEditor isoEditor;
 
         public Levels.IsoLevel CurLevel
         {
@@ -57,25 +60,24 @@ namespace LightningBug
             curLevel = newLevel;
         }
 
-        public void HandleInput(GameTime gameTime)
+        public void HandleInput(GameTime gameTime, KeyboardState keyState)
         {
-            KeyboardState ks = Keyboard.GetState();
-            if (ks.IsKeyDown(Keys.Left))
+            if (keyState.IsKeyDown(Keys.Left))
             {
                 Isometric.IsoCamera.Move(new Vector2(-2, 0));
             }
 
-            if (ks.IsKeyDown(Keys.Right))
+            if (keyState.IsKeyDown(Keys.Right))
             {
                 Isometric.IsoCamera.Move(new Vector2(2, 0));
             }
 
-            if (ks.IsKeyDown(Keys.Up))
+            if (keyState.IsKeyDown(Keys.Up))
             {
                 Isometric.IsoCamera.Move(new Vector2(0, -2));
             }
 
-            if (ks.IsKeyDown(Keys.Down))
+            if (keyState.IsKeyDown(Keys.Down))
             {
                 Isometric.IsoCamera.Move(new Vector2(0, 2));
             }
@@ -83,6 +85,17 @@ namespace LightningBug
 
         public void Update(GameTime gameTime)
         {
+            Vector2 tempOut = Vector2.Zero;
+            Vector2 hilightLoc = Isometric.IsoCamera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
+            hilightPoint = curLevel.Tiles.WorldToMapCell(new Vector2((int)hilightLoc.X, (int)hilightLoc.Y), out tempOut);
+            if (Globals.curMode == GameMode.Main)
+            {
+
+            }
+            else
+            {
+
+            }
         }
 
         public void MoveObjects()
@@ -155,13 +168,11 @@ namespace LightningBug
             }
             
             // Characters
-            Vector2 tempOut = Vector2.Zero;
             /*Vector2 vladStandingOn = myMap.WorldToMapCell(vlad.Position, out tempOut);
             int vladHeight = myMap.Rows[(int)vladStandingOn.Y].Columns[(int)vladStandingOn.X].HeightTiles.Count * Tile.HeightTileOffset;
             vlad.Draw(spriteBatch, 0, -vladHeight);
             */
-            Vector2 hilightLoc = Isometric.IsoCamera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
-            Vector2 hilightPoint = curLevel.Tiles.WorldToMapCell(new Vector2((int)hilightLoc.X, (int)hilightLoc.Y), out tempOut);
+
 
             int hilightrowOffset = 0;
             if ((hilightPoint.Y) % 2 == 1)
@@ -171,6 +182,19 @@ namespace LightningBug
                                     (hilightPoint.Y + 2) * Isometric.Tile.TileStepY)),
                             new Rectangle(0, 0, 64, 32), Color.White * 0.3f, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
             spriteBatch.End();
+        }
+
+        public void LoadTileTypes()
+        {
+        }
+
+        public void InitEditor()
+        {
+            isoEditor = new Levels.IsoEditor();
+        }
+
+        public void DestroyEditor()
+        {
         }
     }
 }

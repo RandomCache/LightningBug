@@ -90,25 +90,25 @@ namespace LightningBug
             spriteBatch.End();
         }
 
-        public void HandleInput(GameTime gameTime)
+        public void HandleInput(GameTime gameTime, KeyboardState keyState)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            if (keyState.IsKeyDown(Keys.W))
             {
                 playerShip.ChangeSpeed(gameTime.ElapsedGameTime, true);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.S))
+            else if (keyState.IsKeyDown(Keys.S))
             {
                 playerShip.ChangeSpeed(gameTime.ElapsedGameTime, false);
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            if (keyState.IsKeyDown(Keys.A))
             {
                 playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, false);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D))
+            else if (keyState.IsKeyDown(Keys.D))
             {
                 playerShip.ChangeRotationSpeed(gameTime.ElapsedGameTime, true);
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.D0))
+            if (keyState.IsKeyDown(Keys.D0))
             {
                 playerShip.SetSpeed(0);
                 playerShip.SetRotationSpeed(0);
@@ -183,6 +183,14 @@ namespace LightningBug
 #if DEBUG
             //playerShip.DebugSetup(new Vector2(2890.771f, 2477.647f), new Vector2(0.8470135f, -0.5315714f), Vector2.Zero, -5.27282f, 0.002f);
 #endif
+        }
+
+        public void InitEditor()
+        {
+        }
+
+        public void DestroyEditor()
+        {
         }
     }
 }

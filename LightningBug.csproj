@@ -39,6 +39,7 @@
     <Compile Include="Camera2D.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Levels\Isometric\IsoCamera.cs" />
+    <Compile Include="Levels\Isometric\IsoEditor.cs" />
     <Compile Include="Levels\Isometric\IsoLevel.cs" />
     <Compile Include="Levels\Isometric\MapCell.cs" />
     <Compile Include="Levels\Isometric\Tile.cs" />

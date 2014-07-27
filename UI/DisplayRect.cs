@@ -8,10 +8,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace LightningBug.UI
 {
+    // Position of element relative to a spot on the screen, none to use just an absolute position
     public enum ScreenPositions
     {
         TopLeft, TopCenter, TopRight, RightCenter,
-        BottomRight, BottomCenter, BottomLeft, LeftCenter
+        BottomRight, BottomCenter, BottomLeft, LeftCenter, None
     };
     // UI Rectangle used for displaying a texture, a string, or both.
     public class DisplayRect
@@ -26,13 +27,13 @@ namespace LightningBug.UI
 
         public uint Depth { get { return depth; } set { depth = value; } }
 
-        public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions corner = ScreenPositions.TopLeft, string str = null)
+        public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions scrennRelativePos = ScreenPositions.TopLeft, string str = null)
         {
             if(texturePath != string.Empty)
                 texture = content.Load<Texture2D>(texturePath);
             positionOffset = offset;
             displayString = str;
-            screenRelative = corner;
+            screenRelative = scrennRelativePos;
             size = endSize;
             font = Globals.gFonts["Miramonte"];
             if (texture != null)
@@ -43,6 +44,8 @@ namespace LightningBug.UI
 
             if(displayString != null && displayString != string.Empty)
                 displayString = Text.WrapText(font, displayString, size.X);
+            if (scrennRelativePos == ScreenPositions.None)
+                absPosition = offset;
         }
 
         public DisplayRect(string str, Vector2 endSize, Vector2 offset, ScreenPositions posRelative = ScreenPositions.TopLeft)
@@ -128,7 +131,9 @@ namespace LightningBug.UI
                 displayString = Text.WrapText(font, displayString, size.X);
             }
 
-            absPosition = GetAbsolutePosition(irr);
+            // Get the position of the DisplayRect.  If it's not relative to the screen it's absolute position will be good now
+            if(screenRelative != ScreenPositions.None)
+                absPosition = GetAbsolutePosition(irr);
         }
 
         public void Draw(SpriteBatch sb)
@@ -139,6 +144,17 @@ namespace LightningBug.UI
             {
                 sb.DrawString(font, displayString, absPosition, color);
             }
+        }
+
+        public bool IsPointInside(Point point)
+        {
+            if (point.X >= absPosition.X && point.X <= absPosition.X + size.X &&
+                point.Y >= absPosition.Y && point.Y <= absPosition.Y + size.Y)
+            {
+                return true;
+            }
+             
+            return false;
         }
     }
 }

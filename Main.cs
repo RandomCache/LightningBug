@@ -1,4 +1,6 @@
-﻿#region Using Statements
+﻿#define DEV
+
+#region Using Statements
 using System;
 using System.Collections.Generic;
 using System.Xml;
@@ -14,6 +16,7 @@ using Microsoft.Xna.Framework.GamerServices;
 namespace LightningBug
 {
     public enum LevelType { Space, Planet };
+    public enum GameMode { Main, Editor};
 
     public struct ScreenInfo
     {
@@ -28,6 +31,7 @@ namespace LightningBug
 #if DEBUG
         public static Debug gDebug;
 #endif
+        public static GameMode curMode; // Are we playing the game or editing it?
     }
     
     /// <summary>
@@ -41,7 +45,6 @@ namespace LightningBug
         UI.UIManager uiManager;
         private ResolutionRenderer irr;
         ScreenInfo screenInfo;
-        
 
         string startupPath, slnDir;
 
@@ -53,6 +56,8 @@ namespace LightningBug
 
         private SpaceManager spaceManager;
         private IsoManager isoManager;
+
+        KeyboardState previousKeyState;
 
         public LightningBug()
             : base()
@@ -128,6 +133,7 @@ namespace LightningBug
             //@TODO try catch around the loading
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
             uiManager.Load(Content, "test");
+            isoManager.LoadTileTypes();
             //ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
             ChangeLevel("..\\..\\..\\Content\\Levels\\TestIsoLevel.xml");
         }
@@ -175,17 +181,50 @@ namespace LightningBug
 
         void HandleInput(GameTime gameTime)
         {
+            KeyboardState ks = Keyboard.GetState();
+            MouseState ms = Mouse.GetState();
+            if(previousKeyState == null)
+                previousKeyState = ks;            
+
             // TODO make controls customizable
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || ks.IsKeyDown(Keys.Escape))
                 Exit();
             /*else if (Keyboard.GetState().IsKeyDown(Keys.L) && curLevel != null)
             {
                 ChangeLevel("test");
             }*/
+#if DEV
+            if(ks.IsKeyDown(Keys.F2) && previousKeyState.IsKeyUp(Keys.F2))
+            {
+                if(Globals.curMode == GameMode.Main)
+                {
+                    Globals.curMode = GameMode.Editor;
+                    // Initialize the editor
+                    if (curLevelType == LevelType.Space)
+                        spaceManager.InitEditor();
+                    if (curLevelType == LevelType.Planet)
+                        isoManager.InitEditor();
+                }
+                else if(Globals.curMode == GameMode.Editor)
+                {
+                    Globals.curMode = GameMode.Main;
+                    if (curLevelType == LevelType.Space)
+                        spaceManager.DestroyEditor();
+                    if (curLevelType == LevelType.Planet)
+                        isoManager.DestroyEditor();
+                }
+            }                
+#endif
+
+            // First check the UI. We don't want any mouse input to go through the UI
+            uiManager.HandleInput(irr, gameTime, ms);
+
             if (curLevelType == LevelType.Space)
-                spaceManager.HandleInput(gameTime);
+                spaceManager.HandleInput(gameTime, ks);
             if (curLevelType == LevelType.Planet)
-                isoManager.HandleInput(gameTime);
+                isoManager.HandleInput(gameTime, ks);
+
+            previousKeyState = Keyboard.GetState();
         }
 
         /// <summary>
@@ -243,6 +282,7 @@ namespace LightningBug
             curLevelType = levelType;
             if (levelType == LevelType.Space)
             {
+                spaceManager.Initialize(irr, Content);
                 if (spaceManager.CurLevel != null)
                     spaceManager.CurLevel.UnloadLevel();
                 spaceManager.CurLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
@@ -252,7 +292,6 @@ namespace LightningBug
                 screenInfo.curScreenPos.Y = (int)(screenInfo.curScreenCenter.Y - (screenInfo.virtualScreenDimensions.Y / 2));
                 background = Content.Load<Texture2D>("Art\\blank"); // change these names to the names of your images
 
-                spaceManager.Initialize(irr, Content);
                 spaceManager.UpdateLevel(spaceManager.CurLevel);
                 spaceManager.SetupNewLevel(Content, screenInfo);
             }
