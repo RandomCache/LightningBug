@@ -199,6 +199,8 @@ namespace LightningBug
                 if(Globals.curMode == GameMode.Main)
                 {
                     Globals.curMode = GameMode.Editor;
+                    //Remove current UI
+                    uiManager.ClearScene();
                     // Initialize the editor
                     if (curLevelType == LevelType.Space)
                         spaceManager.InitEditor();

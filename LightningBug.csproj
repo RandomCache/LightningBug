@@ -58,7 +58,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolutionRenderer.cs" />
     <Compile Include="Ship.cs" />
+    <Compile Include="UI\BoxItem.cs" />
     <Compile Include="UI\DisplayRect.cs" />
+    <Compile Include="UI\Listbox.cs" />
     <Compile Include="UI\Text.cs" />
     <Compile Include="UI\UIManager.cs" />
   </ItemGroup>

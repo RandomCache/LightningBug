@@ -139,7 +139,7 @@ namespace LightningBug.UI
         public void Draw(SpriteBatch sb)
         {
             if (texture != null)
-                sb.Draw(texture, absPosition, null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
+                sb.Draw(texture, absPosition, null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, depth);
             if (displayString != null && displayString != string.Empty)
             {
                 sb.DrawString(font, displayString, absPosition, color);

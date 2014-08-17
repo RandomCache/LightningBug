@@ -19,7 +19,8 @@ namespace LightningBug.UI
             }
         }
 
-        List<DisplayRect> UIObjects;
+        List<DisplayRect> UIRects;
+        List<Listbox> UIListBoxes;
         Texture2D background;
         string curScene;
         UIElementSorter sorter;
@@ -32,7 +33,8 @@ namespace LightningBug.UI
 
         public UIManager()
         {
-            UIObjects = new List<UI.DisplayRect>();
+            UIRects = new List<UI.DisplayRect>();
+            UIListBoxes = new List<Listbox>();
             curScene = string.Empty;
             sorter = new UIElementSorter();
             curHoverElement = null;
@@ -48,20 +50,24 @@ namespace LightningBug.UI
             DisplayRect textureTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.TopRight);
             DisplayRect bothTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(20, 20), ScreenPositions.TopLeft, "both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd");
             DisplayRect stringTest = new DisplayRect("stringstring1 string2 stringstringstringstring3 stringstringstring4 stringstringstring5 stringstring6 stringstring7", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.BottomLeft);
+            //Listbox testListbox = new Listbox(new Vector2(500,0), new Vector2(150, 20));
             //both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd
             textureTest.Depth = 2;
             stringTest.Depth = 1;
             bothTest.Depth = 3;
-            UIObjects.Add(textureTest);
-            UIObjects.Add(stringTest);
-            UIObjects.Add(bothTest);
-            UIObjects.Sort(sorter);
+            UIRects.Add(textureTest);
+            UIRects.Add(stringTest);
+            UIRects.Add(bothTest);
+            UIRects.Sort(sorter);
+            //UIListBoxes.Add(testListbox);
+            //testListbox.AddItem("test1");
+            //testListbox.AddItem("test2");
             // End Test
         }
 
         public void ClearScene()
         {
-            UIObjects.Clear();
+            UIRects.Clear();
         }
 
         // Returns true if the user selected an UI element.
@@ -69,7 +75,7 @@ namespace LightningBug.UI
         {
             // Check to see if the mouse is hovering over any UI elements
             bool hovering = false;
-            foreach (UI.DisplayRect dRect in UIObjects)
+            foreach (UI.DisplayRect dRect in UIRects)
             {
                 if (dRect.IsPointInside(ms.Position))
                 {
@@ -91,7 +97,7 @@ namespace LightningBug.UI
                         startHoverTime = gameTime.TotalGameTime;
                         if (toolTip != null)
                         {
-                            UIObjects.Remove(toolTip);
+                            UIRects.Remove(toolTip);
                             toolTip = null;
                         }
                     }
@@ -105,7 +111,7 @@ namespace LightningBug.UI
                 // If a tooltip is currently active and the cursor isn't hovering over anything destroy the active tooltip
                 if (toolTip != null)
                 {
-                    UIObjects.Remove(toolTip);
+                    UIRects.Remove(toolTip);
                     toolTip = null;
                 }
             }
@@ -128,12 +134,12 @@ namespace LightningBug.UI
                 xDiff = rightOfText - irr.ScreenWidth;
             toolTip = new DisplayRect("Test Hover", new Vector2(200, 50), new Vector2(mousePos.X - xDiff, mousePos.Y), ScreenPositions.None);
             toolTip.Depth = 0;
-            UIObjects.Add(toolTip);
+            UIRects.Add(toolTip);
         }
 
         public void UpdateAll(ResolutionRenderer irr)
         {
-            foreach (UI.DisplayRect dRect in UIObjects)
+            foreach (UI.DisplayRect dRect in UIRects)
             {
                 if(dRect != null)
                     dRect.Update(irr);
@@ -142,11 +148,17 @@ namespace LightningBug.UI
 
         public void Draw(SpriteBatch sb)
         {
-            foreach(UI.DisplayRect dRect in UIObjects)
+            foreach(UI.DisplayRect dRect in UIRects)
             {
                 if (dRect != null)
                     dRect.Draw(sb);
             }
+
+            //foreach (UI.Listbox boxes in UIListBoxes)
+            //{
+            //    if (boxes != null)
+            //        boxes.Draw(sb);
+            //}            
         }
     }
 }

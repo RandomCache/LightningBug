@@ -191,10 +191,12 @@ namespace LightningBug
         public void InitEditor()
         {
             isoEditor = new Levels.IsoEditor();
+            // Create the listbox of tilemaps
         }
 
         public void DestroyEditor()
         {
+            isoEditor = null;
         }
     }
 }
