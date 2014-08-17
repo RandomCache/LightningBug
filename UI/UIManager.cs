@@ -24,6 +24,7 @@ namespace LightningBug.UI
         Texture2D background;
         string curScene;
         UIElementSorter sorter;
+        GraphicsDevice graphicsDevice;
 
         // Hover & tooltip
         DisplayRect curHoverElement; // The element, if not null, that the mouse is hovering over.
@@ -31,8 +32,9 @@ namespace LightningBug.UI
         TimeSpan toolTipHoverTime = TimeSpan.FromMilliseconds(3000); // 3000 ms
         DisplayRect toolTip;
 
-        public UIManager()
+        public UIManager(GraphicsDevice gd)
         {
+            graphicsDevice = gd;
             UIRects = new List<UI.DisplayRect>();
             UIListBoxes = new List<Listbox>();
             curScene = string.Empty;
@@ -50,18 +52,18 @@ namespace LightningBug.UI
             DisplayRect textureTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.TopRight);
             DisplayRect bothTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(20, 20), ScreenPositions.TopLeft, "both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd");
             DisplayRect stringTest = new DisplayRect("stringstring1 string2 stringstringstringstring3 stringstringstring4 stringstringstring5 stringstring6 stringstring7", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.BottomLeft);
-            //Listbox testListbox = new Listbox(new Vector2(500,0), new Vector2(150, 20));
+            Listbox testListbox = new Listbox(this, new Vector2(500,0), new Vector2(150, 20));
             //both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd
-            textureTest.Depth = 2;
-            stringTest.Depth = 1;
-            bothTest.Depth = 3;
+            textureTest.Depth = 0.2f;
+            stringTest.Depth = 0;
+            bothTest.Depth = 0.3f;
             UIRects.Add(textureTest);
             UIRects.Add(stringTest);
             UIRects.Add(bothTest);
             UIRects.Sort(sorter);
-            //UIListBoxes.Add(testListbox);
-            //testListbox.AddItem("test1");
-            //testListbox.AddItem("test2");
+            UIListBoxes.Add(testListbox);
+            testListbox.AddItem("test1");
+            testListbox.AddItem("test2");
             // End Test
         }
 
@@ -71,7 +73,7 @@ namespace LightningBug.UI
         }
 
         // Returns true if the user selected an UI element.
-        public bool HandleInput(ResolutionRenderer irr, GameTime gameTime, MouseState ms)
+        public bool HandleInput(ResolutionRenderer irr, GameTime gameTime, MouseState ms, KeyboardState ks, MouseState prevMs, KeyboardState prevKs)
         {
             // Check to see if the mouse is hovering over any UI elements
             bool hovering = false;
@@ -103,7 +105,7 @@ namespace LightningBug.UI
                     }
                     break;
                 }                
-            }
+            } // End of hovering
             if (!hovering)
             {
                 // Reset the hovering timer anytime the cursor isn't hovering over anything
@@ -117,6 +119,16 @@ namespace LightningBug.UI
             }
 
             // If there's a click, activate the appropriate UI element
+            if (ms.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed)
+            {
+                foreach (UI.Listbox box in UIListBoxes)
+                {
+                    /*if (box.FindSelectedItem(ms.Position))
+                    {
+                    }*/
+                    box.FindSelectedItem(ms.Position);
+                }
+            }
             return false;
         }
 
@@ -154,11 +166,17 @@ namespace LightningBug.UI
                     dRect.Draw(sb);
             }
 
-            //foreach (UI.Listbox boxes in UIListBoxes)
-            //{
-            //    if (boxes != null)
-            //        boxes.Draw(sb);
-            //}            
+            foreach (UI.Listbox box in UIListBoxes)
+            {
+                if (box != null)
+                    box.Draw(sb);
+            }            
+        }
+
+        public GraphicsDevice GetGraphics(string caller)
+        {
+            Logging.Instance(Logging.DEFAULTLOG).Log("Main::GetGraphics - Called from. " + caller + "\n");
+            return graphicsDevice;
         }
     }
 }

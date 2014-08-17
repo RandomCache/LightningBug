@@ -2,7 +2,7 @@
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>D:/Code/LightningBug/MGCB/../Content/Art/Blank.bmp</SourceFile>
   <DestFile>D:/Code/LightningBug/bin/Windows/Release/dots/../Content/Art/Blank.xnb</DestFile>
-  <DestTime>2014-08-16T17:09:15.3266091-07:00</DestTime>
+  <DestTime>2014-08-16T23:25:35.3623812-07:00</DestTime>
   <Importer>TextureImporter</Importer>
   <Processor>TextureProcessor</Processor>
   <Dependencies />

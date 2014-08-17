@@ -19,13 +19,13 @@ namespace LightningBug.UI
     {
         string displayString;
         Vector2 positionOffset, absPosition, size, scale;
-        uint depth; // Used for draw order. 0 = On Top
+        float depth; // Used for draw order. 0 = On Top - 1 = At the Back
         protected Texture2D texture;
         SpriteFont font;
         ScreenPositions screenRelative;
-        Color color; // TODO Use Color
+        Color textColor;//, bgColor;
 
-        public uint Depth { get { return depth; } set { depth = value; } }
+        public float Depth { get { return depth; } set { depth = value; } }
 
         public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions scrennRelativePos = ScreenPositions.TopLeft, string str = null)
         {
@@ -40,7 +40,8 @@ namespace LightningBug.UI
                 scale = new Vector2(size.X / texture.Width, size.Y / texture.Height);
             else
                 scale = Vector2.One;
-            color = Color.Green;
+            textColor = Color.Green;
+            //bgColor = Color.Transparent;
 
             if(displayString != null && displayString != string.Empty)
                 displayString = Text.WrapText(font, displayString, size.X);
@@ -138,11 +139,16 @@ namespace LightningBug.UI
 
         public void Draw(SpriteBatch sb)
         {
+            // Draw the texture if it's there, otherwise draw the background color
             if (texture != null)
                 sb.Draw(texture, absPosition, null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, depth);
+            /*else
+            {
+                sb.Draw(
+            }*/
             if (displayString != null && displayString != string.Empty)
             {
-                sb.DrawString(font, displayString, absPosition, color);
+                sb.DrawString(font, displayString, absPosition, textColor);
             }
         }
 
@@ -155,6 +161,23 @@ namespace LightningBug.UI
             }
              
             return false;
+        }
+
+        // Used to draw a solid color background
+        public void CreateSolidBackgroundTexture(GraphicsDevice gd, Color bgColor)
+        {
+            //Texture2D rect = new Texture2D(graphics.GraphicsDevice, 80, 30);
+            if (texture == null)
+                texture = new Texture2D(gd, (int)size.X, (int)size.Y);
+            Color[] data = new Color[(int)(size.X * size.Y)];
+            for (int i = 0; i < data.Length; ++i)
+                data[i] = bgColor;
+            texture.SetData(data);
+        }
+
+        public void RemoveSolidBackgroundTexture()
+        {
+            texture = null;
         }
     }
 }

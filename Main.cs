@@ -39,7 +39,7 @@ namespace LightningBug
     /// </summary>
     public class LightningBug : Game
     {
-        // TODO: Move graphics to it's own class.  duh
+        // TODO: Move graphics to it's own class.
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         UI.UIManager uiManager;
@@ -58,6 +58,7 @@ namespace LightningBug
         private IsoManager isoManager;
 
         KeyboardState previousKeyState;
+        MouseState previousMouseState;
 
         public LightningBug()
             : base()
@@ -71,8 +72,6 @@ namespace LightningBug
 #if DEBUG
             Globals.gDebug = new Debug();
 #endif
-
-            uiManager = new UI.UIManager();
         }
 
         /// <summary>
@@ -108,6 +107,8 @@ namespace LightningBug
 
             spaceManager = new SpaceManager();
             isoManager = new IsoManager();
+
+            uiManager = new UI.UIManager(GraphicsDevice);
 
             // Get current resolution of the viewport         
             screenInfo.screenDimensions.X = GraphicsDevice.Viewport.Width;
@@ -219,7 +220,7 @@ namespace LightningBug
 #endif
 
             // First check the UI. We don't want any mouse input to go through the UI
-            uiManager.HandleInput(irr, gameTime, ms);
+            uiManager.HandleInput(irr, gameTime, ms, ks, previousMouseState, previousKeyState);
 
             if (curLevelType == LevelType.Space)
                 spaceManager.HandleInput(gameTime, ks);
@@ -227,6 +228,7 @@ namespace LightningBug
                 isoManager.HandleInput(gameTime, ks);
 
             previousKeyState = Keyboard.GetState();
+            previousMouseState = Mouse.GetState();
         }
 
         /// <summary>
