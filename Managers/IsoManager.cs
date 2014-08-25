@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using LightningBug.UI;
 
 namespace LightningBug
 {
@@ -181,6 +182,7 @@ namespace LightningBug
             spriteBatch.Draw(hilight, Isometric.IsoCamera.WorldToScreen(new Vector2((hilightPoint.X * Isometric.Tile.TileStepX) + hilightrowOffset,
                                     (hilightPoint.Y + 2) * Isometric.Tile.TileStepY)),
                             new Rectangle(0, 0, 64, 32), Color.White * 0.3f, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+
             spriteBatch.End();
         }
 
@@ -188,10 +190,25 @@ namespace LightningBug
         {
         }
 
-        public void InitEditor()
+        public void InitEditor(UIManager ui)
         {
-            isoEditor = new Levels.IsoEditor();
+            isoEditor = new Levels.IsoEditor(ui);
             // Create the listbox of tilemaps
+        }
+
+        public void DrawEditor(SpriteBatch spriteBatch)
+        {
+            if (Globals.curMode != GameMode.Editor)
+                return;
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            //Draw selected tile in the editor
+            if (isoEditor.GetUIManager() != null && isoEditor.GetUIManager().SelectedCellType >= 0)
+            {
+                //new Vector2(100, 100), new Vector2(-10, 10) : size and position from top right of the selected background
+                spriteBatch.Draw(Isometric.Tile.TileSetTexture, new Vector2(Isometric.IsoCamera.ViewWidth - 92, 28), Isometric.Tile.GetSourceRectangle(isoEditor.GetUIManager().SelectedCellType), Color.White,
+                    0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+            }
+            spriteBatch.End();
         }
 
         public void DestroyEditor()

@@ -18,7 +18,7 @@ namespace LightningBug.UI
     public class DisplayRect
     {
         string displayString;
-        Vector2 positionOffset, absPosition, size, scale;
+        Vector2 positionOffset, position, size, scale;
         float depth; // Used for draw order. 0 = On Top - 1 = At the Back
         protected Texture2D texture;
         SpriteFont font;
@@ -27,13 +27,13 @@ namespace LightningBug.UI
 
         public float Depth { get { return depth; } set { depth = value; } }
 
-        public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions scrennRelativePos = ScreenPositions.TopLeft, string str = null)
+        public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions screenRelativePos = ScreenPositions.None, string str = null, float pDepth = 1.0f)
         {
             if(texturePath != string.Empty)
                 texture = content.Load<Texture2D>(texturePath);
             positionOffset = offset;
             displayString = str;
-            screenRelative = scrennRelativePos;
+            screenRelative = screenRelativePos;
             size = endSize;
             font = Globals.gFonts["Miramonte"];
             if (texture != null)
@@ -42,15 +42,16 @@ namespace LightningBug.UI
                 scale = Vector2.One;
             textColor = Color.Green;
             //bgColor = Color.Transparent;
+            depth = pDepth;
 
             if(displayString != null && displayString != string.Empty)
                 displayString = Text.WrapText(font, displayString, size.X);
-            if (scrennRelativePos == ScreenPositions.None)
-                absPosition = offset;
+            if (screenRelativePos == ScreenPositions.None)
+                position = offset;
         }
 
-        public DisplayRect(string str, Vector2 endSize, Vector2 offset, ScreenPositions posRelative = ScreenPositions.TopLeft)
-            : this(null, string.Empty, endSize, offset, posRelative, str)
+        public DisplayRect(string str, Vector2 endSize, Vector2 offset, ScreenPositions posRelative = ScreenPositions.None, float pDepth = 1.0f)
+            : this(null, string.Empty, endSize, offset, posRelative, str, pDepth)
         {
         }
 
@@ -133,29 +134,31 @@ namespace LightningBug.UI
             }
 
             // Get the position of the DisplayRect.  If it's not relative to the screen it's absolute position will be good now
-            if(screenRelative != ScreenPositions.None)
-                absPosition = GetAbsolutePosition(irr);
+            if (screenRelative != ScreenPositions.None)
+                position = GetAbsolutePosition(irr);
+            else
+                position = positionOffset;
         }
 
         public void Draw(SpriteBatch sb)
         {
             // Draw the texture if it's there, otherwise draw the background color
             if (texture != null)
-                sb.Draw(texture, absPosition, null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, depth);
+                sb.Draw(texture, position, null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, depth);
             /*else
             {
                 sb.Draw(
             }*/
             if (displayString != null && displayString != string.Empty)
             {
-                sb.DrawString(font, displayString, absPosition, textColor);
+                sb.DrawString(font, displayString, position, textColor);
             }
         }
 
         public bool IsPointInside(Point point)
         {
-            if (point.X >= absPosition.X && point.X <= absPosition.X + size.X &&
-                point.Y >= absPosition.Y && point.Y <= absPosition.Y + size.Y)
+            if (point.X >= position.X && point.X <= position.X + size.X &&
+                point.Y >= position.Y && point.Y <= position.Y + size.Y)
             {
                 return true;
             }

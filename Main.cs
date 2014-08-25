@@ -133,7 +133,7 @@ namespace LightningBug
 
             //@TODO try catch around the loading
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
-            uiManager.Load(Content, "test");
+            //uiManager.Load(Content, "test");
             isoManager.LoadTileTypes();
             //ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
             ChangeLevel("..\\..\\..\\Content\\Levels\\TestIsoLevel.xml");
@@ -200,13 +200,11 @@ namespace LightningBug
                 if(Globals.curMode == GameMode.Main)
                 {
                     Globals.curMode = GameMode.Editor;
-                    //Remove current UI
-                    uiManager.ClearScene();
                     // Initialize the editor
                     if (curLevelType == LevelType.Space)
                         spaceManager.InitEditor();
                     if (curLevelType == LevelType.Planet)
-                        isoManager.InitEditor();
+                        isoManager.InitEditor(uiManager);
                 }
                 else if(Globals.curMode == GameMode.Editor)
                 {
@@ -216,6 +214,7 @@ namespace LightningBug
                     if (curLevelType == LevelType.Planet)
                         isoManager.DestroyEditor();
                 }
+                uiManager.Load(Content, "test", Globals.curMode, curLevelType);
             }                
 #endif
 
@@ -248,6 +247,9 @@ namespace LightningBug
             spriteBatch.Begin();
             uiManager.Draw(spriteBatch);
             spriteBatch.End();
+
+            if(Globals.curMode == GameMode.Editor)
+                isoManager.DrawEditor(spriteBatch);
             base.Draw(gameTime);
         }
 
@@ -306,7 +308,8 @@ namespace LightningBug
                     Exit();
                 isoManager.CurLevel.LoadLevel(xDoc, ref screenInfo.curScreenCenter);
                 isoManager.UpdateLevel(isoManager.CurLevel);
-            }                
+            }
+            uiManager.Load(Content, "test", Globals.curMode, levelType);
         }
     }
 }

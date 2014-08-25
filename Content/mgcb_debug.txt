@@ -13,3 +13,4 @@
 /build:..\Content\Art\Backgrounds\Nebula.png
 /build:..\Content\Art\UI\Backgrounds\MainMenu.png
 /build:..\Content\Art\UI\TestButton.png
+/build:..\Content\Art\UI\Editor\TestItemBackground.png

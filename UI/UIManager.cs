@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using LightningBug.Isometric;
 
 namespace LightningBug.UI
 {
@@ -32,6 +33,16 @@ namespace LightningBug.UI
         TimeSpan toolTipHoverTime = TimeSpan.FromMilliseconds(3000); // 3000 ms
         DisplayRect toolTip;
 
+        // Editor elements
+        Listbox tileTypeListbox;
+        int selectedCellType;
+
+        public int SelectedCellType
+        {
+            get { return selectedCellType; }
+            set { selectedCellType = value; }
+        }
+
         public UIManager(GraphicsDevice gd)
         {
             graphicsDevice = gd;
@@ -40,36 +51,49 @@ namespace LightningBug.UI
             curScene = string.Empty;
             sorter = new UIElementSorter();
             curHoverElement = null;
+            selectedCellType = 54;
         }
 
-        public void Load(ContentManager content, string newScene)
+        public void Load(ContentManager content, string newScene, GameMode gameMode, LevelType levelType)
         {
+            // TODO load UI from a file or get rid of newScene.  May just keep it simple and hardcoded to save dev time
             if (newScene == curScene)
                 return;
             ClearScene();
             // Test scene code
-            background = content.Load<Texture2D>("Art\\UI\\Backgrounds\\MainMenu");
-            DisplayRect textureTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.TopRight);
-            DisplayRect bothTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(20, 20), ScreenPositions.TopLeft, "both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd");
-            DisplayRect stringTest = new DisplayRect("stringstring1 string2 stringstringstringstring3 stringstringstring4 stringstringstring5 stringstring6 stringstring7", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.BottomLeft);
-            Listbox testListbox = new Listbox(this, new Vector2(500,0), new Vector2(150, 20));
-            //both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd
-            textureTest.Depth = 0.2f;
-            stringTest.Depth = 0;
-            bothTest.Depth = 0.3f;
-            UIRects.Add(textureTest);
-            UIRects.Add(stringTest);
-            UIRects.Add(bothTest);
-            UIRects.Sort(sorter);
-            UIListBoxes.Add(testListbox);
-            testListbox.AddItem("test1");
-            testListbox.AddItem("test2");
+            if (gameMode == GameMode.Main)
+            {
+                
+                background = content.Load<Texture2D>("Art\\UI\\Backgrounds\\MainMenu");
+                //DisplayRect textureTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(-00, 10), ScreenPositions.TopRight);
+                DisplayRect bothTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(20, 20), ScreenPositions.TopLeft, "both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd");
+                DisplayRect stringTest = new DisplayRect("stringstring1 string2 stringstringstringstring3 stringstringstring4 stringstringstring5 stringstring6 stringstring7", new Vector2(200, 100), new Vector2(10, 10), ScreenPositions.BottomLeft);
+                //both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd
+                //textureTest.Depth = 0.2f;
+                stringTest.Depth = 0;
+                bothTest.Depth = 0.3f;
+                //UIRects.Add(textureTest);
+                UIRects.Add(stringTest);
+                UIRects.Add(bothTest);
+                UIRects.Sort(sorter);
+            }
+            else
+            {
+                tileTypeListbox = new Listbox(this, new Vector2(-10, 200), new Vector2(150, 20), ScreenPositions.TopRight);
+                UIListBoxes.Add(tileTypeListbox);
+                tileTypeListbox.AddItem("test1");
+                tileTypeListbox.AddItem("test2");
+
+                DisplayRect editorSelectBackground = new DisplayRect(content, "Art\\UI\\Editor\\TestItemBackground", new Vector2(100, 100), new Vector2(-10, 10), ScreenPositions.TopRight);
+                UIRects.Add(editorSelectBackground);
+            }
             // End Test
         }
 
         public void ClearScene()
         {
             UIRects.Clear();
+            UIListBoxes.Clear();
         }
 
         // Returns true if the user selected an UI element.
@@ -121,12 +145,21 @@ namespace LightningBug.UI
             // If there's a click, activate the appropriate UI element
             if (ms.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed)
             {
+                int findReturn = -1;
                 foreach (UI.Listbox box in UIListBoxes)
                 {
                     /*if (box.FindSelectedItem(ms.Position))
                     {
                     }*/
-                    box.FindSelectedItem(ms.Position);
+                    
+                    if(box.FindSelectedItem(ms.Position, out findReturn))
+                    {
+                        // This is the list box the user selects their currently selected tile type.
+                        if(box == tileTypeListbox)
+                        {                            
+                            selectedCellType = findReturn;
+                        }
+                    }
                 }
             }
             return false;
@@ -156,6 +189,11 @@ namespace LightningBug.UI
                 if(dRect != null)
                     dRect.Update(irr);
             }
+            foreach (UI.Listbox box in UIListBoxes)
+            {
+                if (box != null)
+                    box.Update(irr);
+            }
         }
 
         public void Draw(SpriteBatch sb)
@@ -170,7 +208,7 @@ namespace LightningBug.UI
             {
                 if (box != null)
                     box.Draw(sb);
-            }            
+            }
         }
 
         public GraphicsDevice GetGraphics(string caller)
