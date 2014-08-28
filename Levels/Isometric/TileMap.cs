@@ -13,6 +13,17 @@ namespace LightningBug.Isometric
         public int MapWidth = 50;
         public int MapHeight = 50;
 
+        public void ChangeBaseTile(Vector2 coords, int newTileId)
+        {
+            Rows[(int)coords.Y].Columns[(int)coords.X].BaseTile = newTileId;
+        }
+
+        // Clear all the height tiles from a specific tile
+        public void ClearHeightTiles(Vector2 coords)
+        {
+            Rows[(int)coords.Y].Columns[(int)coords.X].HeightTiles.Clear();
+        }
+
         public Vector2 WorldToMapCell(Vector2 worldPoint, out Vector2 localPoint)
         {
             Vector2 mapCell = new Vector2((int)(worldPoint.X / Tile.TileWidth),

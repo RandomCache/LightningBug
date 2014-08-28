@@ -61,7 +61,7 @@ namespace LightningBug
             curLevel = newLevel;
         }
 
-        public void HandleInput(GameTime gameTime, KeyboardState keyState)
+        public void HandleInput(GameTime gameTime, MouseState mouseState, KeyboardState keyState, MouseState prevMouseState, KeyboardState prevKeyState)
         {
             if (keyState.IsKeyDown(Keys.Left))
             {
@@ -82,6 +82,17 @@ namespace LightningBug
             {
                 Isometric.IsoCamera.Move(new Vector2(0, 2));
             }
+
+            if (Globals.curMode == GameMode.Editor)
+            {
+                if (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
+                    isoEditor.SelectedCell = hilightPoint;
+                // Set the currently selected cell to the new one
+                if (keyState.IsKeyDown(Keys.Enter) && prevKeyState.IsKeyDown(Keys.Enter))
+                {
+                    curLevel.Tiles.ChangeBaseTile(isoEditor.SelectedCell, isoEditor.GetUIManager().SelectedCellType);
+                }
+            }
         }
 
         public void Update(GameTime gameTime)
@@ -93,9 +104,9 @@ namespace LightningBug
             {
 
             }
-            else
+            else if(Globals.curMode == GameMode.Editor)
             {
-
+                //isoEditor.SelectedCell = hilightPoint;
             }
         }
 
@@ -134,12 +145,15 @@ namespace LightningBug
 
                     if ((mapx >= curLevel.Tiles.MapWidth) || (mapy >= curLevel.Tiles.MapHeight))
                         continue;
-                    foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].BaseTiles)
+                    /*foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].BaseTiles)
                     {
                         spriteBatch.Draw(Isometric.Tile.TileSetTexture, Isometric.IsoCamera.WorldToScreen(new Vector2((mapx * Isometric.Tile.TileStepX) + rowOffset,
                             mapy * Isometric.Tile.TileStepY)), Isometric.Tile.GetSourceRectangle(tileID), Color.White,
                             0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 1.0f);
-                    }
+                    }*/
+                    spriteBatch.Draw(Isometric.Tile.TileSetTexture, Isometric.IsoCamera.WorldToScreen(new Vector2((mapx * Isometric.Tile.TileStepX) + rowOffset,
+                        mapy * Isometric.Tile.TileStepY)), Isometric.Tile.GetSourceRectangle(curLevel.Tiles.Rows[mapy].Columns[mapx].BaseTile), Color.White,
+                        0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 1.0f);
                     int heightRow = 0;
 
                     foreach (int tileID in curLevel.Tiles.Rows[mapy].Columns[mapx].HeightTiles)

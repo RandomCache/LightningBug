@@ -7,6 +7,7 @@ namespace LightningBug.Isometric
 {
     public class MapCell
     {
+        /*
         public int TileID
         {
             get { return BaseTiles.Count > 0 ? BaseTiles[0] : 0; }
@@ -17,33 +18,39 @@ namespace LightningBug.Isometric
                 else
                     AddBaseTile(value);
             }
-        }
+        }*/
 
         public bool Walkable { get; set; }
 
-        public List<int> BaseTiles = new List<int>();
+        //public List<int> BaseTiles = new List<int>();
+        public int BaseTile { get; set; }
         public List<int> HeightTiles = new List<int>();
         public List<int> Props = new List<int>();
 
         public MapCell(int tileID)
         {
-            TileID = tileID;
+            //TileID = tileID;
+            BaseTile = tileID;
             Walkable = true;
         }
-
+        /*
         public void AddBaseTile(int tileID)
         {
             BaseTiles.Add(tileID);
         }
-
-        public void AddHeightTile(int tileID)
+        */
+        public void SetBaseTile(int tileId)
         {
-            HeightTiles.Add(tileID);
+            BaseTile = tileId;
+        }
+        public void AddHeightTile(int tileId)
+        {
+            HeightTiles.Add(tileId);
         }
 
-        public void AddProp(int tileID)
+        public void AddProp(int tileId)
         {
-            Props.Add(tileID);
+            Props.Add(tileId);
         }
     }
 }

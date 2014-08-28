@@ -93,7 +93,8 @@ namespace LightningBug.Levels
                     !Int32.TryParse(curTile.Element("Column").Value, out column) ||
                     !Int32.TryParse(curTile.Element("Id").Value, out id))
                     return false;
-                myMap.Rows[row].Columns[column].TileID = id;
+                //myMap.Rows[row].Columns[column].TileID = id;
+                myMap.Rows[row].Columns[column].BaseTile = id;
             }
             foreach (XElement curTile in curElement.Descendants("HeightTile"))
             {

@@ -83,7 +83,7 @@ namespace LightningBug.UI
                 UIListBoxes.Add(tileTypeListbox);
                 tileTypeListbox.AddItem("test1");
                 tileTypeListbox.AddItem("test2");
-
+                
                 DisplayRect editorSelectBackground = new DisplayRect(content, "Art\\UI\\Editor\\TestItemBackground", new Vector2(100, 100), new Vector2(-10, 10), ScreenPositions.TopRight);
                 UIRects.Add(editorSelectBackground);
             }
@@ -203,7 +203,7 @@ namespace LightningBug.UI
                 if (dRect != null)
                     dRect.Draw(sb);
             }
-
+            
             foreach (UI.Listbox box in UIListBoxes)
             {
                 if (box != null)

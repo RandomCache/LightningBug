@@ -224,7 +224,7 @@ namespace LightningBug
             if (curLevelType == LevelType.Space)
                 spaceManager.HandleInput(gameTime, ks);
             if (curLevelType == LevelType.Planet)
-                isoManager.HandleInput(gameTime, ks);
+                isoManager.HandleInput(gameTime, ms, ks, previousMouseState, previousKeyState);
 
             previousKeyState = Keyboard.GetState();
             previousMouseState = Mouse.GetState();

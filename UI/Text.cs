@@ -43,7 +43,7 @@ namespace LightningBug.UI
                             Vector2 mytempstrsize = spriteFont.MeasureString(tempStr);
                             if (mytempstrsize.X >= maxLineWidth)
                             {
-                                if(i > 1)
+                                if (i > 1)
                                 {
                                     tempStr = tempStr.Substring(0, tempStr.Length - 1);
                                 }
@@ -74,13 +74,14 @@ namespace LightningBug.UI
                     else
                         line += word + " ";
                 }
-                else
+                else if (word != words.Last())
                     line += word + " ";
+                else
+                    line += word;
             }
 
             if (line.Length > 0)
-                newSentence.AppendLine(line);
-
+                newSentence.Append(line);
             return newSentence.ToString();
         }
     }
