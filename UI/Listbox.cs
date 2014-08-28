@@ -152,6 +152,7 @@ namespace LightningBug.UI
                     {
                         //newSelected = dRect;
                         Select(dRect);
+                        break;
                     }
                     numFound++;
                 }

@@ -51,7 +51,7 @@ namespace LightningBug.UI
             curScene = string.Empty;
             sorter = new UIElementSorter();
             curHoverElement = null;
-            selectedCellType = 54;
+            selectedCellType = 6;
         }
 
         public void Load(ContentManager content, string newScene, GameMode gameMode, LevelType levelType)
