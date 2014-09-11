@@ -1,0 +1,13 @@
+# Directories
+/outputDir:..\bin\Windows\Debug\dots
+
+/rebuild
+
+# Build a texture
+/build:..\Content\Textures\Tilesets\part1_tileset.png
+/build:..\Content\Textures\Tilesets\part2_tileset.png
+/build:..\Content\Textures\Tilesets\part3_tileset.png
+/build:..\Content\Textures\Tilesets\part4_tileset.png
+/build:..\Content\Textures\Tilesets\mousemap.png
+/build:..\Content\Textures\Tilesets\hilight.png
+/build:..\Content\Textures\Characters\T_Vlad_Sword_Walking_48x48.png
