@@ -27,6 +27,12 @@ namespace LightningBug.UI
 
         public float Depth { get { return depth; } set { depth = value; } }
 
+        public Vector2 Position { get { return position; } set { position = value; } }
+
+        public Vector2 PositionOffset { get { return positionOffset; } set { positionOffset = value; } }
+
+        public Vector2 Size { get { return size; } set { size = value; } }
+
         public DisplayRect(ContentManager content, string texturePath, Vector2 endSize, Vector2 offset, ScreenPositions screenRelativePos = ScreenPositions.None, string str = null, float pDepth = 1.0f)
         {
             if(texturePath != string.Empty)

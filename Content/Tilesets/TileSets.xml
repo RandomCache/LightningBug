@@ -1,0 +1,16 @@
+<LightningBugLevel>
+	<File FileName="temp_groung_tileset_01.png" ElemWidth="64" ElemHeight="64" ItemsPerRow="10">
+		<Row>7</Row>
+		<Row>8</Row>
+		<Row>4</Row>
+		<Row>9</Row>
+		<Row>4</Row>
+		<Row>10</Row>
+		<Row>10</Row>
+		<Row>10</Row>
+		<Row>10</Row>
+		<Row>10</Row>
+		<Row>3</Row>
+		<Row>10</Row>
+	</File>
+</LightningBugLevel>

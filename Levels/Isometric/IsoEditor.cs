@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using LightningBug.UI;
 
@@ -21,6 +23,9 @@ namespace LightningBug.Levels
 //        int tileId
         UIManager uiManager;
         public Vector2 SelectedCell { get; set; }
+
+        //public int[][] curTileSetIds;
+        public TileSet selectedTileSet;
 
         public IsoEditor(UIManager ui)
         {

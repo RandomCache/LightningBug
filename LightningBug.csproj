@@ -45,6 +45,7 @@
     <Compile Include="Levels\Isometric\Tile.cs" />
     <Compile Include="Levels\Isometric\TileMap.cs" />
     <Compile Include="Graphics\Primitives.cs" />
+    <Compile Include="Levels\Isometric\TileSet.cs" />
     <Compile Include="Managers\IsoManager.cs" />
     <Compile Include="Managers\SpaceManager.cs" />
     <Compile Include="Physics\Collision.cs" />
@@ -91,12 +92,12 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if $(ConfigurationName) == Debug (
-cd /d "D:\Code\LightningBug\MGCB\"
-mgcb.exe /@:"D:\Code\LightningBug\Content\mgcb_debug.txt"
+cd /d "C:\Projects\LightningBug\MGCB\"
+mgcb.exe /@:"C:\Projects\LightningBug\Content\mgcb_debug.txt"
 )
 ELSE IF $(ConfigurationName) == Release(
-cd /d "D:\Code\LightningBug\MGCB\"
-mgcb.exe /@:"D:\Code\LightningBug\Content\mgcb_release.txt"
+cd /d "C:\Projects\LightningBug\MGCB\"
+mgcb.exe /@:"C:\Projects\LightningBug\Content\mgcb_release.txt"
 )</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

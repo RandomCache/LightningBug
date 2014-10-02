@@ -4,13 +4,13 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Tilesets\temp_groung_tileset_01.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Tilesets\hilight.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\Blank.bmp</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\Vehicles\SampleShip.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\Vehicles\2dAlienUfo.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\Backgrounds\Starfield.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\Backgrounds\Nebula.png</File>
-    <File>D:\Code\LightningBug\MGCB\..\Content\Art\UI\Editor\TestItemBackground.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Tilesets\temp_ground_tileset_01.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Tilesets\hilight.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\Blank.bmp</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\Vehicles\SampleShip.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\Vehicles\2dAlienUfo.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\Backgrounds\Starfield.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\Backgrounds\Nebula.png</File>
+    <File>C:\Projects\LightningBug\MGCB\..\Content\Art\UI\Editor\TestItemBackground.png</File>
   </SourceFiles>
 </SourceFileCollection>

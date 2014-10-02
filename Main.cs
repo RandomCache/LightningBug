@@ -108,7 +108,7 @@ namespace LightningBug
             spaceManager = new SpaceManager();
             isoManager = new IsoManager();
 
-            uiManager = new UI.UIManager(GraphicsDevice);
+            uiManager = new UI.UIManager(GraphicsDevice, spaceManager, isoManager);
 
             // Get current resolution of the viewport         
             screenInfo.screenDimensions.X = GraphicsDevice.Viewport.Width;
@@ -134,7 +134,6 @@ namespace LightningBug
             //@TODO try catch around the loading
             Globals.gFonts["Miramonte"] = Content.Load<SpriteFont>("Fonts\\Miramonte");
             //uiManager.Load(Content, "test");
-            isoManager.LoadTileTypes();
             //ChangeLevel("..\\..\\..\\Content\\Levels\\TestLevel.xml");
             ChangeLevel("..\\..\\..\\Content\\Levels\\TestIsoLevel.xml");
         }

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using LightningBug.Isometric;
+using LightningBug.Levels;
 
 namespace LightningBug.UI
 {
@@ -34,8 +35,12 @@ namespace LightningBug.UI
         DisplayRect toolTip;
 
         // Editor elements
-        Listbox tileTypeListbox;
+        Listbox tileSetListbox; // show all the tile sets
+        Listbox tileTypeListbox; // show the tiles from the current tile set
         int selectedCellType;
+        // Managers used for level type data when editing
+        SpaceManager spaceManager;
+        IsoManager isoManager;
 
         public int SelectedCellType
         {
@@ -43,7 +48,7 @@ namespace LightningBug.UI
             set { selectedCellType = value; }
         }
 
-        public UIManager(GraphicsDevice gd)
+        public UIManager(GraphicsDevice gd, SpaceManager sm, IsoManager im)
         {
             graphicsDevice = gd;
             UIRects = new List<UI.DisplayRect>();
@@ -52,6 +57,8 @@ namespace LightningBug.UI
             sorter = new UIElementSorter();
             curHoverElement = null;
             selectedCellType = 6;
+            spaceManager = sm;
+            isoManager = im;
         }
 
         public void Load(ContentManager content, string newScene, GameMode gameMode, LevelType levelType)
@@ -62,8 +69,7 @@ namespace LightningBug.UI
             ClearScene();
             // Test scene code
             if (gameMode == GameMode.Main)
-            {
-                
+            {                
                 background = content.Load<Texture2D>("Art\\UI\\Backgrounds\\MainMenu");
                 //DisplayRect textureTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(-00, 10), ScreenPositions.TopRight);
                 DisplayRect bothTest = new DisplayRect(content, "Art\\UI\\TestButton", new Vector2(200, 100), new Vector2(20, 20), ScreenPositions.TopLeft, "both temp bothtemp tempbothtemp2both2temp3both3 dkfjakiekjdf agqd");
@@ -79,10 +85,11 @@ namespace LightningBug.UI
             }
             else
             {
-                tileTypeListbox = new Listbox(this, new Vector2(-10, 200), new Vector2(150, 20), ScreenPositions.TopRight);
+                tileSetListbox = new Listbox(this, new Vector2(-10, 200), new Vector2(150, 20), new Vector2(150, 100), ScreenPositions.TopRight);
+                UIListBoxes.Add(tileSetListbox);
+                tileTypeListbox = new Listbox(this, new Vector2(-10, 300), new Vector2(150, 20), new Vector2(150, 200), ScreenPositions.TopRight);
                 UIListBoxes.Add(tileTypeListbox);
-                tileTypeListbox.AddItem("test1");
-                tileTypeListbox.AddItem("test2");
+                SetupEditorTileBoxes();
                 
                 DisplayRect editorSelectBackground = new DisplayRect(content, "Art\\UI\\Editor\\TestItemBackground", new Vector2(100, 100), new Vector2(-10, 10), ScreenPositions.TopRight);
                 UIRects.Add(editorSelectBackground);
@@ -211,9 +218,41 @@ namespace LightningBug.UI
             }
         }
 
+        // Setup the tileSetListbox and tileTypeListbox.  tileSetListbox needs to contain all the tile sets and 
+        // tileTypeListbox needs to contain the tile sof the selected tile set.  The first one will be the default
+        public void SetupEditorTileBoxes()
+        {
+            if(isoManager == null)
+                return;
+            Dictionary<string, TileSet> tileSetList = isoManager.GetTileSets();
+            if (tileSetList.Count <= 0)
+            {
+                Logging.Instance(Logging.DEFAULTLOG).Log("UIManager::SetupEditorTileBoxes - No tile sets\n");
+                return;
+            }
+            foreach (KeyValuePair<string, TileSet> tileSet in tileSetList)
+            {
+                tileSetListbox.AddItem(tileSet.Value.fileName);
+            }
+            // Default the selection to the first tileSet
+            isoManager.isoEditor.selectedTileSet = tileSetList.First().Value;                        
+                
+            // Now setup tileTypeListbox with each tile type of the current set.
+            // Fill with row and column for each item in this tileSet
+            //isoManager.isoEditor.curTileSetIds
+            for(int row = 0; row < isoManager.isoEditor.selectedTileSet.tileIds.Length; ++row)
+            {
+                for (int col = 0; col< isoManager.isoEditor.selectedTileSet.tileIds[row].Length; ++col)
+                {
+                    tileTypeListbox.AddItem(row + ", " + col);
+                    //todo
+                }
+            }
+        }
+
         public GraphicsDevice GetGraphics(string caller)
         {
-            Logging.Instance(Logging.DEFAULTLOG).Log("Main::GetGraphics - Called from. " + caller + "\n");
+            Logging.Instance(Logging.DEFAULTLOG).Log("UIManager::GetGraphics - Called from. " + caller + "\n");
             return graphicsDevice;
         }
     }

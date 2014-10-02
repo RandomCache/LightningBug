@@ -11,17 +11,18 @@ namespace LightningBug.UI
     {
         UIManager uiManager;
         List<DisplayRect> mainList;
-        Vector2 itemSize;
+        Vector2 itemSize, maxSize;
         Vector2 position, positionOffset;
         DisplayRect selectedItem;
         ScreenPositions screenRelative;
 
-        public Listbox(UIManager uim, Vector2 pos, Vector2 itemsize, ScreenPositions screenRelativePos = ScreenPositions.None)
+        public Listbox(UIManager uim, Vector2 pos, Vector2 itemsize, Vector2 maxsize, ScreenPositions screenRelativePos = ScreenPositions.None)
         {
             uiManager = uim;
             mainList = new List<DisplayRect>();
             position = positionOffset = pos;
             itemSize = itemsize;
+            maxSize = maxsize;
             selectedItem = null;
             screenRelative = screenRelativePos;
         }
@@ -42,7 +43,7 @@ namespace LightningBug.UI
             int count = 0;
             foreach (DisplayRect dRect in mainList) // It's a list so I have to run through them all anyway... for now
             {
-                newPos.Y += itemSize.Y * count;
+                newPos.Y = position.Y + (itemSize.Y * count);
                 ++count;
                 //public void Update(ResolutionRenderer irr, Vector2? newOffset = null, Vector2? newSize = null)
                 dRect.Update(irr, newPos);
@@ -116,10 +117,15 @@ namespace LightningBug.UI
         {
             foreach (DisplayRect dRect in mainList)
             {
-                if (dRect == selectedItem)
+                if ((dRect.Position.X - position.X) + dRect.Size.X > maxSize.X ||
+                    (dRect.Position.Y - position.Y) + dRect.Size.Y > maxSize.Y)
+                {
+                    break;
+                }
+                /*if (dRect == selectedItem)
                 {
 
-                }
+                }*/
                 dRect.Draw(sb);
             }
         }
@@ -188,6 +194,14 @@ namespace LightningBug.UI
             ret.X = itemSize.X;
             ret.Y = itemSize.Y * mainList.Count;
             return ret;
+        }
+
+        public int GetNumItems()
+        {
+            if (mainList != null)
+                return mainList.Count;
+            else
+                return 0;
         }
     }
 }

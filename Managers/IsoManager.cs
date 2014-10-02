@@ -2,21 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using LightningBug.UI;
+using LightningBug.Levels;
 
 namespace LightningBug
 {
     public class IsoManager
     {
         Texture2D hilight;
-        Levels.IsoLevel curLevel;
+        IsoLevel curLevel;
         Vector2 hilightPoint;
 
-        Levels.IsoEditor isoEditor;
+        // Iso Editor objects
+        public IsoEditor isoEditor;
+        public Dictionary<string, TileSet> tileSets;
 
         public Levels.IsoLevel CurLevel
         {
@@ -27,6 +32,7 @@ namespace LightningBug
         public IsoManager()
         {
             curLevel = null;
+            tileSets = new Dictionary<string, TileSet>();
         }
 
         public void Initialize(ContentManager cm)
@@ -34,9 +40,14 @@ namespace LightningBug
             curLevel = new Levels.IsoLevel(cm);
         }
 
+        public Dictionary<string, TileSet> GetTileSets()
+        {
+            return tileSets;
+        }
+
         public bool LoadIsoContent(GraphicsDeviceManager gdm, ContentManager cm)
         {
-            Isometric.Tile.TileSetTexture = cm.Load<Texture2D>(@"TileSets\temp_groung_tileset_01");
+            Isometric.Tile.TileSetTexture = cm.Load<Texture2D>(@"TileSets\temp_ground_tileset_01");
             //texture = content.Load<Texture2D>(Art\\Vehicles\\SampleShip);
             hilight = cm.Load<Texture2D>(@"TileSets\hilight");
             curLevel.Tiles = new Isometric.TileMap();
@@ -200,14 +211,146 @@ namespace LightningBug
             spriteBatch.End();
         }
 
-        public void LoadTileTypes()
+        public void LoadTileTypes(string tileTypesPath)
         {
+            XDocument xDoc = XDocument.Load(tileTypesPath);
+            //XElement curElement, childElement;
+            //curElement = xDoc.Root.Element("LightningBugLevel");
+            if (xDoc.Root == null)
+            {
+                Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadTileTypes: xDoc.Root is null \n");
+                return;
+            }
+            XAttribute tempAtt;
+            foreach (XElement file in xDoc.Root.Descendants("File"))
+            {
+                TileSet newTileSet = new TileSet();
+                tempAtt = file.Attribute("FileName");
+                if (tempAtt == null)
+                {
+                    Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadTileTypes: FileName is null \n");
+                    System.Environment.Exit(1); // Exitting in order to never not notice this error
+                }
+                else
+                {
+                    newTileSet.fileName = tempAtt.Value;
+                }
+
+                // Move on if this tile set has already been added
+                if(tileSets.ContainsKey(newTileSet.fileName))
+                    continue;
+
+                tempAtt = file.Attribute("ElemWidth");
+                if (tempAtt == null)
+                {
+                    Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadTileTypes: ElemWidth is null \n");
+                    System.Environment.Exit(1); // Exitting in order to never not notice this error                    
+                }
+                else
+                {
+                    newTileSet.elemWidth = Int32.Parse(tempAtt.Value);
+                }
+                tempAtt = file.Attribute("ElemHeight");
+                if (tempAtt == null)
+                {
+                    Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadTileTypes: ElemHeight is null \n");
+                    System.Environment.Exit(1); // Exitting in order to never not notice this error                    
+                }
+                else
+                {
+                    newTileSet.elemHeight = Int32.Parse(tempAtt.Value);
+                }
+                tempAtt = file.Attribute("ItemsPerRow");
+                if (tempAtt == null)
+                {
+                    Logging.Instance(Logging.DEFAULTLOG).Log("IsoManager::LoadTileTypes: ItemsPerRow is null \n");
+                    System.Environment.Exit(1); // Exitting in order to never not notice this error                    
+                }
+                else
+                {
+                    newTileSet.itemsPerRow = Int32.Parse(tempAtt.Value);
+                }
+                newTileSet.numRows = file.Descendants("Row").Count();
+                newTileSet.rows = new int[newTileSet.numRows];
+                int count = 0;
+                foreach (XElement row in file.Descendants("Row"))
+                {
+                    newTileSet.rows[count] = Int32.Parse(row.Value);
+                    ++count;
+                }
+
+                tileSets.Add(newTileSet.fileName, newTileSet);
+            } // foreach(XElement file in curElement.Nodes())            
         }
 
         public void InitEditor(UIManager ui)
         {
             isoEditor = new Levels.IsoEditor(ui);
             // Create the listbox of tilemaps
+            LoadTileTypes(@"..\..\..\Content\Tilesets\TileSets.xml");
+            LoadTileSetIds();
+        }
+
+        // Used by the editor only.  Calculates the tile id for each tile in a tileset.
+        public void LoadTileSetIds()
+        {
+            TileSet tempSet;
+            foreach (KeyValuePair<string, TileSet> setList in tileSets)
+            {
+                tempSet = setList.Value;
+                int curId = 0;
+                tempSet.tileIds = new int[tempSet.rows.Length][];
+                for(int i = 0; i < tempSet.rows.Length; ++i)
+                {
+                    curId = i * tempSet.itemsPerRow;
+                    tempSet.tileIds[i] = new int[tempSet.rows[i]];
+                    for(int j = 0; j < tempSet.rows[i]; ++j)
+                    {
+                        tempSet.tileIds[i][j] = curId;
+                        ++curId;
+                    }
+                }
+                /* TODO Remove if not needed - 9/28
+                XDocument xDoc = XDocument.Load(tempSet.fileName);
+                if (xDoc == null)
+                {
+                    Logging.Instance(Logging.DEFAULTLOG).Log("IsoEditor::LoadTileSetIds - Invalid curTileSetFilePath.\n");
+                    continue;
+                }
+                TileSet curTileSet;
+                // If the tileset doesn't exist create and set it.
+                if (!isoManager.tileSets.ContainsKey(curTileSetFilePath))
+                {
+                    curTileSet = new TileSet();
+                    isoManager.tileSets.Add(curTileSetFilePath, curTileSet);
+                }
+                else
+                    curTileSet = isoManager.tileSets[curTileSetFilePath];
+
+                curTileSet.tileIds = new int[rows.Length][];
+                //curTileSetIds = new int[rows.Length][];
+                for (int i = 0; i < rows.Length; ++i)
+                {
+                    //curTileSetIds[i] = new int[rows[i]];
+                    curTileSet.tileIds[i] = new int[rows[i]];
+                }
+
+                XElement curElement;
+                curElement = xDoc.Root.Element("Tiles");
+                int row, column, id;
+                foreach (XElement curTile in curElement.Descendants("Tile"))
+                {
+                    if (!Int32.TryParse(curTile.Element("Row").Value, out row) ||
+                        !Int32.TryParse(curTile.Element("Column").Value, out column) ||
+                        !Int32.TryParse(curTile.Element("Id").Value, out id))
+                    {
+                        Logging.Instance(Logging.DEFAULTLOG).Log("IsoEditor::LoadTileSetIds - Parsing error.\n");
+                        return;
+                    }
+                    //curTileSetIds[row][column] = id;
+                    curTileSet.tileIds[row][column] = id;
+                }*/
+            } // foreach (TileSet tileSet in tileSets)
         }
 
         public void DrawEditor(SpriteBatch spriteBatch)
