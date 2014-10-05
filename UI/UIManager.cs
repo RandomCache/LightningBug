@@ -27,6 +27,7 @@ namespace LightningBug.UI
         string curScene;
         UIElementSorter sorter;
         GraphicsDevice graphicsDevice;
+        UIBase curSelected;
 
         // Hover & tooltip
         DisplayRect curHoverElement; // The element, if not null, that the mouse is hovering over.
@@ -59,6 +60,7 @@ namespace LightningBug.UI
             selectedCellType = 6;
             spaceManager = sm;
             isoManager = im;
+            curSelected = null;
         }
 
         public void Load(ContentManager content, string newScene, GameMode gameMode, LevelType levelType)
@@ -165,7 +167,27 @@ namespace LightningBug.UI
                         if(box == tileTypeListbox)
                         {                            
                             selectedCellType = findReturn;
+                            curSelected = box;
                         }
+                    }
+                }
+            } // if (ms.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed)
+            
+            // If a list box is selected and the user presses the page down or up keys to scroll
+            if(UIListBoxes.Count > 0)
+            {
+                if(ks.IsKeyUp(Keys.PageDown) && prevKs.IsKeyDown(Keys.PageDown))
+                {
+                    if (curSelected.GetType() == UIListBoxes.First().GetType())
+                    {
+                        ((Listbox)curSelected).Scroll(false, 3);
+                    }
+                }
+                if(ks.IsKeyUp(Keys.PageUp) && prevKs.IsKeyDown(Keys.PageUp))
+                {
+                    if (curSelected.GetType() == UIListBoxes.First().GetType())
+                    {
+                        ((Listbox)curSelected).Scroll(true, 3);
                     }
                 }
             }

@@ -60,6 +60,7 @@
     <Compile Include="ResolutionRenderer.cs" />
     <Compile Include="Ship.cs" />
     <Compile Include="UI\BoxItem.cs" />
+    <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\DisplayRect.cs" />
     <Compile Include="UI\Listbox.cs" />
     <Compile Include="UI\Text.cs" />

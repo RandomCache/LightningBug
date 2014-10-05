@@ -7,13 +7,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace LightningBug.UI
 {
-    public class Listbox
+    public class Listbox : UIBase
     {
         UIManager uiManager;
         List<DisplayRect> mainList;
         Vector2 itemSize, maxSize;
         Vector2 position, positionOffset;
         DisplayRect selectedItem;
+        int topItemDisplayed;
         ScreenPositions screenRelative;
 
         public Listbox(UIManager uim, Vector2 pos, Vector2 itemsize, Vector2 maxsize, ScreenPositions screenRelativePos = ScreenPositions.None)
@@ -32,6 +33,8 @@ namespace LightningBug.UI
             Vector2 newPos = position;
             newPos.Y += itemSize.Y * mainList.Count;
             mainList.Add(new DisplayRect(newItem, itemSize, newPos, ScreenPositions.None));
+            if (mainList.Count == 1)
+                topItemDisplayed = 0;
         }
 
         public void Update(ResolutionRenderer irr)
@@ -41,12 +44,12 @@ namespace LightningBug.UI
                 position = GetAbsolutePosition(irr);
             Vector2 newPos = position;
             int count = 0;
-            foreach (DisplayRect dRect in mainList) // It's a list so I have to run through them all anyway... for now
+            // Start at the top item to be displayed.  When drawing, that's where Draw will start.
+            for(int i = topItemDisplayed; i < mainList.Count; ++i)
             {
                 newPos.Y = position.Y + (itemSize.Y * count);
                 ++count;
-                //public void Update(ResolutionRenderer irr, Vector2? newOffset = null, Vector2? newSize = null)
-                dRect.Update(irr, newPos);
+                mainList[i].Update(irr, newPos);
             }
         }
 
@@ -115,19 +118,28 @@ namespace LightningBug.UI
 
         public void Draw(SpriteBatch sb)
         {
+            bool haveStartedDrawing = false;
+            // Start drawing with topItemDisplayed
+            int count = 0;
             foreach (DisplayRect dRect in mainList)
             {
-                if ((dRect.Position.X - position.X) + dRect.Size.X > maxSize.X ||
-                    (dRect.Position.Y - position.Y) + dRect.Size.Y > maxSize.Y)
+                if (topItemDisplayed != null && !haveStartedDrawing && count == topItemDisplayed)
+                    haveStartedDrawing = true;
+                if (haveStartedDrawing)
                 {
-                    break;
-                }
-                /*if (dRect == selectedItem)
-                {
+                    if ((dRect.Position.X - position.X) + dRect.Size.X > maxSize.X ||
+                        (dRect.Position.Y - position.Y) + dRect.Size.Y > maxSize.Y)
+                    {
+                        break;
+                    }
+                    /*if (dRect == selectedItem)
+                    {
 
-                }*/
-                dRect.Draw(sb);
-            }
+                    }*/
+                    dRect.Draw(sb);
+                }
+                count++;
+            } // foreach (DisplayRect dRect in mainList)
         }
 
         public bool IsPointInside(Point point)
@@ -166,6 +178,25 @@ namespace LightningBug.UI
             }
 
             return false;
+        }
+
+        // Scroll the list box the number of entries in count in the direction of up
+        public void Scroll(bool up, int count)
+        {
+            if (mainList.Count <= 0)
+                return;
+            if (up)
+            {
+                topItemDisplayed -= count;
+                if (topItemDisplayed < 0)
+                    topItemDisplayed = 0;
+            }
+            else
+            {
+                topItemDisplayed += count;
+                if (topItemDisplayed >= mainList.Count)
+                    topItemDisplayed = mainList.Count - 1;
+            }
         }
 
         public void ClearListBox()

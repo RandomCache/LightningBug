@@ -15,7 +15,7 @@ namespace LightningBug.UI
         BottomRight, BottomCenter, BottomLeft, LeftCenter, None
     };
     // UI Rectangle used for displaying a texture, a string, or both.
-    public class DisplayRect
+    public class DisplayRect : UIBase
     {
         string displayString;
         Vector2 positionOffset, position, size, scale;
